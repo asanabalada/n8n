@@ -1,31 +1,18 @@
 {
-  "updatedAt": "2026-03-03T02:13:49.809Z",
+  "updatedAt": "2026-03-03T02:15:45.671Z",
   "createdAt": "2026-03-02T23:05:04.738Z",
   "id": "SR9ei2iQCoRYSmZT",
   "name": "Backup Diario n8n para GitHub - Definitivo",
-  "active": false,
+  "active": true,
   "isArchived": false,
   "nodes": [
-    {
-      "parameters": {},
-      "name": "Execucao Manual",
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        -928,
-        -16
-      ],
-      "notesInFlow": true,
-      "id": "a7770ea7-dd2e-4494-bd47-4e9c36a6da47",
-      "notes": "Botão 'Execute Workflow'"
-    },
     {
       "parameters": {
         "rule": {
           "interval": [
             {
-              "field": "cronExpression",
-              "expression": "30 23 * * *"
+              "triggerAtHour": 23,
+              "triggerAtMinute": null
             }
           ]
         }
@@ -34,8 +21,8 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.1,
       "position": [
-        -928,
-        192
+        -912,
+        96
       ],
       "notesInFlow": true,
       "id": "d11de105-35e9-4f69-a1d3-8e284e56f3b3",
@@ -188,7 +175,7 @@
       "type": "n8n-nodes-base.github",
       "typeVersion": 1,
       "position": [
-        640,
+        656,
         -16
       ],
       "id": "088de5e2-9d19-4981-85a6-26e4d4020833",
@@ -237,17 +224,6 @@
     }
   ],
   "connections": {
-    "Execucao Manual": {
-      "main": [
-        [
-          {
-            "node": "Buscar Todos os Fluxos",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Agendamento Diario": {
       "main": [
         [
@@ -343,14 +319,18 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "staticData": null,
+  "staticData": {
+    "node:Agendamento Diario": {
+      "recurrenceRules": []
+    }
+  },
   "meta": {
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "e8eb036f-cb02-42c4-9f4e-0d18c485e110",
-  "activeVersionId": null,
-  "triggerCount": 0,
+  "versionId": "eb5b8f3c-2d2a-42d7-820f-a85d074e06f0",
+  "activeVersionId": "eb5b8f3c-2d2a-42d7-820f-a85d074e06f0",
+  "triggerCount": 1,
   "shared": [
     {
       "updatedAt": "2026-03-02T23:05:04.738Z",
@@ -360,6 +340,325 @@
       "projectId": "v0LdrnPHSqH3q9P1"
     }
   ],
-  "activeVersion": null,
+  "activeVersion": {
+    "updatedAt": "2026-03-03T02:15:45.673Z",
+    "createdAt": "2026-03-03T02:15:45.673Z",
+    "versionId": "eb5b8f3c-2d2a-42d7-820f-a85d074e06f0",
+    "workflowId": "SR9ei2iQCoRYSmZT",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 23,
+                "triggerAtMinute": null
+              }
+            ]
+          }
+        },
+        "name": "Agendamento Diario",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          -912,
+          96
+        ],
+        "notesInFlow": true,
+        "id": "d11de105-35e9-4f69-a1d3-8e284e56f3b3",
+        "notes": "Roda às 23:30"
+      },
+      {
+        "parameters": {
+          "filters": {},
+          "requestOptions": {}
+        },
+        "name": "Buscar Todos os Fluxos",
+        "type": "n8n-nodes-base.n8n",
+        "typeVersion": 1,
+        "position": [
+          -688,
+          96
+        ],
+        "id": "2f8ccc91-9bc1-46bc-a580-d1f0bb8cddb7",
+        "credentials": {
+          "n8nApi": {
+            "id": "bDkMKRrGDlhiUwcl",
+            "name": "Backups"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "string": [
+              {
+                "value1": "={{ $execution.mode }}",
+                "value2": "manual"
+              }
+            ]
+          }
+        },
+        "name": "Foi executado manualmente?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1,
+        "position": [
+          -464,
+          96
+        ],
+        "notesInFlow": true,
+        "id": "94a761d0-080e-4d56-8b42-6a9ef84a2d02",
+        "notes": "Decide o caminho sozinho"
+      },
+      {
+        "parameters": {
+          "jsCode": "const ontem = new Date();\nontem.setDate(ontem.getDate() - 1);\n\nreturn $input.all().filter(item => {\n  const dataAtualizacao = new Date(item.json.updatedAt);\n  return dataAtualizacao > ontem;\n});"
+        },
+        "name": "Filtrar Alterados",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -240,
+          224
+        ],
+        "notesInFlow": true,
+        "id": "255c7baf-2986-4528-a64f-eb03022b7e35",
+        "notes": "Filtro Diário (24h)"
+      },
+      {
+        "parameters": {},
+        "name": "Passo de Unificacao",
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1,
+        "position": [
+          -16,
+          80
+        ],
+        "notesInFlow": true,
+        "id": "7c4c236f-125f-4950-9813-98a310f7fe10",
+        "notes": "Junta os caminhos"
+      },
+      {
+        "parameters": {
+          "authentication": "oAuth2",
+          "resource": "file",
+          "operation": "get",
+          "owner": {
+            "__rl": true,
+            "value": "asanabalada",
+            "mode": ""
+          },
+          "repository": {
+            "__rl": true,
+            "value": "n8n",
+            "mode": ""
+          },
+          "filePath": "={{ 'cliente-x/' + $('Passo de Unificacao').item.json.name + '.json' }}",
+          "additionalParameters": {}
+        },
+        "name": "Verificar se Existe",
+        "type": "n8n-nodes-base.github",
+        "typeVersion": 1,
+        "position": [
+          192,
+          80
+        ],
+        "id": "ebfaa90a-c1ed-42df-94ef-0303e8fc7ea8",
+        "webhookId": "83257be6-9073-4c76-918c-9b31597496f0",
+        "credentials": {
+          "githubOAuth2Api": {
+            "id": "FnwUu4CrnROouTyU",
+            "name": "GitHub account"
+          }
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{ $json.error != undefined }}",
+                "value2": true
+              }
+            ]
+          }
+        },
+        "name": "Arquivo é Novo?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1,
+        "position": [
+          400,
+          80
+        ],
+        "id": "a2aa388a-0e32-41e9-94fc-e8194d95d412"
+      },
+      {
+        "parameters": {
+          "authentication": "oAuth2",
+          "resource": "file",
+          "owner": {
+            "__rl": true,
+            "value": "asanabalada",
+            "mode": ""
+          },
+          "repository": {
+            "__rl": true,
+            "value": "n8n",
+            "mode": ""
+          },
+          "filePath": "={{ 'cliente-x/' + $('Passo de Unificacao').item.json.name + '.json' }}",
+          "fileContent": "={{ JSON.stringify($('Passo de Unificacao').item.json, null, 2) }}",
+          "commitMessage": "={{ 'Backup automático (Criando): ' + $('Passo de Unificacao').item.json.name }}"
+        },
+        "name": "Criar no GitHub",
+        "type": "n8n-nodes-base.github",
+        "typeVersion": 1,
+        "position": [
+          656,
+          -16
+        ],
+        "id": "088de5e2-9d19-4981-85a6-26e4d4020833",
+        "webhookId": "2633a3e0-b944-4e37-94ec-93e121caf9a7",
+        "credentials": {
+          "githubOAuth2Api": {
+            "id": "FnwUu4CrnROouTyU",
+            "name": "GitHub account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "authentication": "oAuth2",
+          "resource": "file",
+          "operation": "edit",
+          "owner": {
+            "__rl": true,
+            "value": "asanabalada",
+            "mode": ""
+          },
+          "repository": {
+            "__rl": true,
+            "value": "n8n",
+            "mode": ""
+          },
+          "filePath": "={{ 'cliente-x/' + $('Passo de Unificacao').item.json.name + '.json' }}",
+          "fileContent": "={{ JSON.stringify($('Passo de Unificacao').item.json, null, 2) }}",
+          "commitMessage": "={{ 'Backup automático (Atualizando): ' + $('Passo de Unificacao').item.json.name }}"
+        },
+        "name": "Editar no GitHub",
+        "type": "n8n-nodes-base.github",
+        "typeVersion": 1,
+        "position": [
+          640,
+          192
+        ],
+        "id": "996fe1e3-b6c1-442c-9bcf-2f5674f8d1b4",
+        "webhookId": "7a451e96-684f-46b6-9a2f-3a0b7211262c",
+        "credentials": {
+          "githubOAuth2Api": {
+            "id": "FnwUu4CrnROouTyU",
+            "name": "GitHub account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Agendamento Diario": {
+        "main": [
+          [
+            {
+              "node": "Buscar Todos os Fluxos",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Todos os Fluxos": {
+        "main": [
+          [
+            {
+              "node": "Foi executado manualmente?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Foi executado manualmente?": {
+        "main": [
+          [
+            {
+              "node": "Passo de Unificacao",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Filtrar Alterados",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Filtrar Alterados": {
+        "main": [
+          [
+            {
+              "node": "Passo de Unificacao",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Passo de Unificacao": {
+        "main": [
+          [
+            {
+              "node": "Verificar se Existe",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Verificar se Existe": {
+        "main": [
+          [
+            {
+              "node": "Arquivo é Novo?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Arquivo é Novo?": {
+        "main": [
+          [
+            {
+              "node": "Criar no GitHub",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Editar no GitHub",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Vinicius Martins",
+    "name": null,
+    "description": null
+  },
   "tags": []
 }
