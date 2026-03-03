@@ -1,0 +1,328 @@
+{
+  "updatedAt": "2026-02-24T17:52:19.890Z",
+  "createdAt": "2026-01-24T18:16:30.217Z",
+  "id": "aIRUVUwXjyGLreIA",
+  "name": "2º Aula - Disparo de Emails",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -464,
+        -64
+      ],
+      "id": "e9466563-f033-4bdc-aa90-1178ef608864",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1FWvxgRZgWwIgM-DGvC28VBreELUFizkGXWER8ueMOgY",
+          "mode": "list",
+          "cachedResultName": "emails-formulario",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FWvxgRZgWwIgM-DGvC28VBreELUFizkGXWER8ueMOgY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Folha1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FWvxgRZgWwIgM-DGvC28VBreELUFizkGXWER8ueMOgY/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Enviado"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -256,
+        -64
+      ],
+      "id": "23e1ee6f-8268-4cfa-a75e-dfe58d24b8b8",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "zArczES6ncW3h74q",
+          "name": "WinnerMidia"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        16,
+        -64
+      ],
+      "id": "aa76c9d3-9625-4b95-91fb-a0bf2b8bb09d",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "Conheça a Winner Mídia São Roque!",
+        "message": "=<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Winner Mídia São Roque</title>\n</head>\n<body style=\"margin:0; padding:0; background:#f4f4f4; font-family:Arial, Helvetica, sans-serif;\">\n  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f4f4f4; padding:20px;\">\n    <tr>\n      <td align=\"center\">\n        \n        <!-- Container -->\n        <table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff; border-radius:8px; overflow:hidden;\">\n          \n          <!-- Header -->\n          <tr>\n            <td style=\"background:#001FAA; padding:25px; text-align:center;\">\n              <h1 style=\"margin:0; color:#ffffff; font-size:24px;\">\n                Winner Mídia São Roque\n              </h1>\n              <p style=\"margin:8px 0 0; color:#dbe3ff; font-size:14px;\">\n                Divulgação estratégica em pontos de alta circulação\n              </p>\n            </td>\n          </tr>\n\n          <!-- Body -->\n          <tr>\n            <td style=\"padding:30px; color:#333333; font-size:15px; line-height:1.6;\">\n              \n              <p style=\"margin-top:0;\">\n                A Winner Mídia São Roque é especializada em <strong>mídia indoor em totens digitais</strong>, posicionados em locais estratégicos da região, onde as pessoas realmente param, permanecem e prestam atenção.\n              </p>\n\n              <p>\n                Nossos totens estão instalados em pontos como:\n              </p>\n\n              <ul style=\"padding-left:20px;\">\n                <li>Supermercados</li>\n                <li>Academia</li>\n                <li>Salão de beleza premium</li>\n                <li>Bar e pontos turísticos</li>\n              </ul>\n\n              <p>\n                Diferente de mídias de passagem rápida, seus anúncios são exibidos em ambientes de espera, garantindo <strong>alta repetição e visibilidade real</strong>.\n              </p>\n\n              <p>\n                Trabalhamos com <strong>poucos anunciantes por totem</strong> e <strong>exclusividade por segmento</strong>, para que sua marca tenha mais destaque e não concorra com empresas do mesmo ramo.\n              </p>\n\n              <!-- Call to Action -->\n              <div style=\"margin:30px 0; text-align:center;\">\n                <a href=\"#\" \n                   style=\"background:#F1C935; color:#001FAA; text-decoration:none; padding:14px 26px; border-radius:6px; font-weight:bold; display:inline-block;\">\n                  Quero saber mais\n                </a>\n              </div>\n\n              <p style=\"font-size:14px; color:#666666;\">\n                Se quiser, posso te indicar o ponto mais adequado para o seu tipo de negócio e explicar como funciona na prática.\n              </p>\n\n            </td>\n          </tr>\n\n          <!-- Footer -->\n          <tr>\n            <td style=\"background:#f0f0f0; padding:20px; text-align:center; font-size:12px; color:#777777;\">\n              Winner Mídia São Roque<br>\n              Mídia indoor estratégica para negócios locais<br><br>\n              Este é um e-mail informativo. Caso não queira mais receber, basta responder solicitando remoção.\n            </td>\n          </tr>\n\n        </table>\n        <!-- End Container -->\n\n      </td>\n    </tr>\n  </table>\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        32
+      ],
+      "id": "5860521c-0554-4449-bb28-30e42d608541",
+      "name": "Send a message",
+      "webhookId": "c0a1da67-ea2f-4376-860f-77f70791b6cc",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "XYDS5Ar7PcOAsAG7",
+          "name": "WinnerMidia"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1FWvxgRZgWwIgM-DGvC28VBreELUFizkGXWER8ueMOgY",
+          "mode": "list",
+          "cachedResultName": "emails-formulario",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FWvxgRZgWwIgM-DGvC28VBreELUFizkGXWER8ueMOgY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Folha1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FWvxgRZgWwIgM-DGvC28VBreELUFizkGXWER8ueMOgY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $('Loop Over Items').item.json.Email }}",
+            "Enviado": "sim"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Nome",
+              "displayName": "Nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Enviado",
+              "displayName": "Enviado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        400,
+        32
+      ],
+      "id": "c7d1f89c-f05b-4ab5-8223-643897e3dcdb",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "zArczES6ncW3h74q",
+          "name": "WinnerMidia"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        576,
+        32
+      ],
+      "id": "a0653ec0-e142-4ad7-b612-b2f8cfea1692",
+      "name": "Wait",
+      "webhookId": "46a5a810-b91e-42ab-ba03-1a2686e09a27"
+    },
+    {
+      "parameters": {
+        "content": "## Busca Leads Planilha",
+        "height": 400,
+        "width": 464,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -528,
+        -144
+      ],
+      "typeVersion": 1,
+      "id": "659f4267-f79e-404c-ae98-e5391a52b353",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Envia emails e atualiza planilha",
+        "height": 400,
+        "width": 832,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -64,
+        -144
+      ],
+      "typeVersion": 1,
+      "id": "760107e5-748e-484a-9195-aaf549b04f6f",
+      "name": "Sticky Note1"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "569b25d7-5983-4899-aae6-883e22b96de6",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-01-24T18:16:30.217Z",
+      "createdAt": "2026-01-24T18:16:30.217Z",
+      "role": "workflow:owner",
+      "workflowId": "aIRUVUwXjyGLreIA",
+      "projectId": "v0LdrnPHSqH3q9P1"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
