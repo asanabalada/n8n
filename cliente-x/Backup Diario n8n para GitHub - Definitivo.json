@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-03T02:10:44.291Z",
+  "updatedAt": "2026-03-03T02:13:49.809Z",
   "createdAt": "2026-03-02T23:05:04.738Z",
   "id": "SR9ei2iQCoRYSmZT",
   "name": "Backup Diario n8n para GitHub - Definitivo",
@@ -105,7 +105,7 @@
       "typeVersion": 1,
       "position": [
         -16,
-        96
+        80
       ],
       "notesInFlow": true,
       "id": "7c4c236f-125f-4950-9813-98a310f7fe10",
@@ -134,7 +134,7 @@
       "typeVersion": 1,
       "position": [
         192,
-        96
+        80
       ],
       "id": "ebfaa90a-c1ed-42df-94ef-0303e8fc7ea8",
       "webhookId": "83257be6-9073-4c76-918c-9b31597496f0",
@@ -161,8 +161,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        416,
-        96
+        400,
+        80
       ],
       "id": "a2aa388a-0e32-41e9-94fc-e8194d95d412"
     },
@@ -348,7 +348,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "6775b448-b32d-4ae9-88c9-e44e40272b6a",
+  "versionId": "e8eb036f-cb02-42c4-9f4e-0d18c485e110",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
