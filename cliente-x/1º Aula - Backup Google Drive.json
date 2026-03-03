@@ -1,0 +1,476 @@
+{
+  "updatedAt": "2026-02-24T17:52:20.941Z",
+  "createdAt": "2026-01-24T17:39:55.321Z",
+  "id": "BeTN0DdfODM6Kviv",
+  "name": "1º Aula - Backup Google Drive",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 3
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -16,
+        -384
+      ],
+      "id": "77bb9eaa-9c51-43af-9ba2-2b9e9b8d6514",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $json.Month }}-{{ $json['Day of month'] }}-{{ $json.Year }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1V3ABO3s_ps3Dl5_hmDLe85LysTtYhowW",
+          "mode": "list",
+          "cachedResultName": "Backups_n8n",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1V3ABO3s_ps3Dl5_hmDLe85LysTtYhowW"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        0,
+        -144
+      ],
+      "id": "0351352d-b32d-45a3-a0d6-7327d33f0c17",
+      "name": "Create folder",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Ak9VcqtmP7DGTOGf",
+          "name": "WinnerMidia"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6e66086a-f7c9-4d7b-bd3e-6ee4267db928",
+              "name": "data",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        192,
+        -144
+      ],
+      "id": "ef2e16aa-9d1a-45d9-8983-7ecbe8b17822",
+      "name": "Set_Variaveis"
+    },
+    {
+      "parameters": {
+        "filters": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "position": [
+        400,
+        -144
+      ],
+      "id": "8833db28-cb89-44d7-b2e9-9704d030d98c",
+      "name": "Get many workflows",
+      "credentials": {
+        "n8nApi": {
+          "id": "bDkMKRrGDlhiUwcl",
+          "name": "Backups"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### Backup's diários",
+        "height": 512,
+        "width": 1248,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -160,
+        -464
+      ],
+      "typeVersion": 1,
+      "id": "d512d520-01ea-49bc-b769-39a9cbfbb183",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "mode": "each",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        608,
+        -144
+      ],
+      "id": "71636c11-c2b2-4c96-84bb-e2ebf8e01192",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "name": "={{ $('Get many workflows').item.json.name }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Create folder').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        816,
+        -144
+      ],
+      "id": "04215366-7921-4adb-abc0-fc19d9021c01",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Ak9VcqtmP7DGTOGf",
+          "name": "WinnerMidia"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Create folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create folder": {
+      "main": [
+        [
+          {
+            "node": "Set_Variaveis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set_Variaveis": {
+      "main": [
+        [
+          {
+            "node": "Get many workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many workflows": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "2dde9212-7dc4-4e98-840a-b706c0a5fe8f",
+  "activeVersionId": "2dde9212-7dc4-4e98-840a-b706c0a5fe8f",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-01-24T17:39:55.321Z",
+      "createdAt": "2026-01-24T17:39:55.321Z",
+      "role": "workflow:owner",
+      "workflowId": "BeTN0DdfODM6Kviv",
+      "projectId": "v0LdrnPHSqH3q9P1"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-02-24T02:40:44.734Z",
+    "createdAt": "2026-02-24T02:40:44.734Z",
+    "versionId": "2dde9212-7dc4-4e98-840a-b706c0a5fe8f",
+    "workflowId": "BeTN0DdfODM6Kviv",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 3
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          -16,
+          -384
+        ],
+        "id": "77bb9eaa-9c51-43af-9ba2-2b9e9b8d6514",
+        "name": "Schedule Trigger"
+      },
+      {
+        "parameters": {
+          "resource": "folder",
+          "name": "={{ $json.Month }}-{{ $json['Day of month'] }}-{{ $json.Year }}",
+          "driveId": {
+            "__rl": true,
+            "value": "My Drive",
+            "mode": "list",
+            "cachedResultName": "My Drive",
+            "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+          },
+          "folderId": {
+            "__rl": true,
+            "value": "1V3ABO3s_ps3Dl5_hmDLe85LysTtYhowW",
+            "mode": "list",
+            "cachedResultName": "Backups_n8n",
+            "cachedResultUrl": "https://drive.google.com/drive/folders/1V3ABO3s_ps3Dl5_hmDLe85LysTtYhowW"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3,
+        "position": [
+          0,
+          -144
+        ],
+        "id": "0351352d-b32d-45a3-a0d6-7327d33f0c17",
+        "name": "Create folder",
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "Ak9VcqtmP7DGTOGf",
+            "name": "WinnerMidia"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "6e66086a-f7c9-4d7b-bd3e-6ee4267db928",
+                "name": "data",
+                "value": "={{ $json.name }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          192,
+          -144
+        ],
+        "id": "ef2e16aa-9d1a-45d9-8983-7ecbe8b17822",
+        "name": "Set_Variaveis"
+      },
+      {
+        "parameters": {
+          "filters": {},
+          "requestOptions": {}
+        },
+        "type": "n8n-nodes-base.n8n",
+        "typeVersion": 1,
+        "position": [
+          400,
+          -144
+        ],
+        "id": "8833db28-cb89-44d7-b2e9-9704d030d98c",
+        "name": "Get many workflows",
+        "credentials": {
+          "n8nApi": {
+            "id": "bDkMKRrGDlhiUwcl",
+            "name": "Backups"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "content": "### Backup's diários",
+          "height": 512,
+          "width": 1248,
+          "color": 4
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -160,
+          -464
+        ],
+        "typeVersion": 1,
+        "id": "d512d520-01ea-49bc-b769-39a9cbfbb183",
+        "name": "Sticky Note"
+      },
+      {
+        "parameters": {
+          "operation": "toJson",
+          "mode": "each",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.convertToFile",
+        "typeVersion": 1.1,
+        "position": [
+          608,
+          -144
+        ],
+        "id": "71636c11-c2b2-4c96-84bb-e2ebf8e01192",
+        "name": "Convert to File"
+      },
+      {
+        "parameters": {
+          "name": "={{ $('Get many workflows').item.json.name }}",
+          "driveId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "My Drive"
+          },
+          "folderId": {
+            "__rl": true,
+            "value": "={{ $('Create folder').item.json.id }}",
+            "mode": "id"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleDrive",
+        "typeVersion": 3,
+        "position": [
+          816,
+          -144
+        ],
+        "id": "04215366-7921-4adb-abc0-fc19d9021c01",
+        "name": "Upload file",
+        "credentials": {
+          "googleDriveOAuth2Api": {
+            "id": "Ak9VcqtmP7DGTOGf",
+            "name": "WinnerMidia"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "Create folder",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create folder": {
+        "main": [
+          [
+            {
+              "node": "Set_Variaveis",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Set_Variaveis": {
+        "main": [
+          [
+            {
+              "node": "Get many workflows",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get many workflows": {
+        "main": [
+          [
+            {
+              "node": "Convert to File",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Convert to File": {
+        "main": [
+          [
+            {
+              "node": "Upload file",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Vinicius Martins",
+    "name": null,
+    "description": null
+  },
+  "tags": []
+}
