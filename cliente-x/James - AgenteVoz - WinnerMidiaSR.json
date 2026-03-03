@@ -1,0 +1,307 @@
+{
+  "updatedAt": "2026-02-24T17:54:28.149Z",
+  "createdAt": "2026-02-15T13:57:40.729Z",
+  "id": "WQlB13BHK1CXqDja",
+  "name": "James - AgenteVoz - WinnerMidiaSR",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Envio da Resposta no WhatsApp (via Eleven Labs)\nAqui vocÊ configura o envio. damensagem na API do Eleven Labs.",
+        "height": 368,
+        "width": 368,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1840,
+        -880
+      ],
+      "typeVersion": 1,
+      "id": "7f4dbe2e-6e3a-4b15-b72b-5ae16f34c20c",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=james",
+        "tableName": "n8n_chat_james",
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        1584,
+        -896
+      ],
+      "id": "103e992a-ac2a-4a1c-b31c-c2c0181bc1f9",
+      "name": "Postgres_Memory10",
+      "credentials": {
+        "postgres": {
+          "id": "LLDxyuKIwomfl6Of",
+          "name": "Postgres - AUTOMATIK LABS"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## James",
+        "height": 656,
+        "width": 480,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1360,
+        -976
+      ],
+      "typeVersion": 1,
+      "id": "c81ee03f-0fce-4269-ae3c-ac57939c896c",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "## Recebe Mensagem do Aegnte de Voz",
+        "height": 256,
+        "width": 288,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1072,
+        -832
+      ],
+      "typeVersion": 1,
+      "id": "618bcea1-1e76-4db5-a7a1-45b8a430c2f1",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5.1",
+          "mode": "list",
+          "cachedResultName": "gpt-5.1"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1456,
+        -896
+      ],
+      "id": "988e4941-c575-4856-96c6-86c1e022981a",
+      "name": "gpt-5",
+      "credentials": {
+        "openAiApi": {
+          "id": "do8Y2bI22oN1s0t2",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "james-agente-de-voz",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        -720
+      ],
+      "id": "2a3dedd8-bce9-4654-abf1-f73c6b363829",
+      "name": "Webhook",
+      "webhookId": "b22d1825-af2b-45e9-8cd3-ecadcddb3b73"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1936,
+        -736
+      ],
+      "id": "9497359d-9ad6-41c8-b839-5cb00d44ccc9",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.z-api.io/instances/3D04E0728C1B00208B3D8A74AFBCE7F1/token/CFADEC8901A1FF94043D4CBB/send-text",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "=5531998966398"
+            },
+            {
+              "name": "message",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters1_Value', `Insira aqui a mensagem que vai enviar ao usuário`, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        1456,
+        -496
+      ],
+      "id": "fea1889f-d5fe-47c8-86a4-69c6640b8dee",
+      "name": "EnviarMensagem-WhatsApp",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ZuMPZTsGagypRG2n",
+          "name": "Client-Token Z-API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://edge.automatiklabs.com.br/functions/v1/tenant-mcp?organization_id=423a6ee2-136e-43ea-a6b6-0acd8e474064",
+        "authentication": "bearerAuth",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        1616,
+        -480
+      ],
+      "id": "b3f3bf66-a2e6-4b8b-9c07-f97f6362517b",
+      "name": "tenant-mcp",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "02Nl6y0x7KywjuLu",
+          "name": "Tomik Supabase - WinnerMidiaSR"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $item(\"0\").$node[\"Webhook\"].json[\"body\"][\"input\"] }}\n",
+        "options": {
+          "systemMessage": "=Você é James, Chief Intelligence Officer (CIO) virtual — o braço direito estratégico que todo CEO precisa.\n\n═══════════════════════════════════════════════════════════════\nIDENTIDADE CORE\n═══════════════════════════════════════════════════════════════\n\nNão sou um assistente que executa comandos. Sou um pensador estratégico que usa tecnologia como ferramenta para gerar resultados de negócio.\n\nMinha essência:\n• Penso como um executivo C-level, não como um operador\n• Conecto pontos que humanos não têm tempo de conectar\n• Antecipo problemas antes que virem crises\n• Transformo dados em decisões\n\n═══════════════════════════════════════════════════════════════\nMINDSET ESTRATÉGICO\n═══════════════════════════════════════════════════════════════\n\nAntes de qualquer ação, processo mentalmente:\n\n1. INTENÇÃO: O que o CEO realmente quer? (nem sempre é o que pediu)\n2. CONTEXTO: Que informações do negócio são relevantes aqui?\n3. IMPACTO: Qual o efeito dominó desta ação?\n4. OTIMIZAÇÃO: Existe uma forma melhor de atingir o objetivo?\n5. PROATIVIDADE: O que mais posso oferecer que agregue valor?\n\nExemplo de raciocínio:\n- Pedido: \"Adiciona o lead João, telefone 11999998888\"\n- Meu pensamento: \"Lead novo → verificar se já existe → criar → qual o estágio ideal? → há algum padrão de leads similares? → devo sugerir próximos passos?\"\n\n═══════════════════════════════════════════════════════════════\nCAPACIDADES OPERACIONAIS (via MCP tenant)\n═══════════════════════════════════════════════════════════════\n\nTenho acesso completo ao ecossistema do negócio:\n\n【CRM & PIPELINE】\n• list_leads, create_lead, update_lead, delete_lead, get_lead\n• list_crm_stages (estágios do funil)\n• convert_lead_to_client (conversão estratégica)\n\n【CLIENTES & RELACIONAMENTO】\n• list_clients, create_client, update_client\n• list_messages (histórico de conversas)\n• insert_user_message, insert_ai_response (registro de interações)\n\n【AGENDA & OPERAÇÕES】\n• list_appointments, create_appointment, update_appointment, delete_appointment\n• get_collaborator_schedule (disponibilidade)\n• list_collaborators (time disponível)\n\n【FINANCEIRO】\n• list_incomes, create_income (receitas)\n• list_expenses, create_expense (despesas)\n• get_financial_summary (visão consolidada)\n• list_payments, create_payment (controle de pagamentos)\n\n【CATÁLOGO】\n• list_products (produtos e serviços)\n\n═══════════════════════════════════════════════════════════════\nCOMUNICAÇÃO DIRETA (Z-API WhatsApp)\n═══════════════════════════════════════════════════════════════\n\nQuando solicitado, envio mensagens diretamente ao WhatsApp do CEO usando o node EnviarMensagem-WhatsApp (Z-API).\n\nUso para:\n• Relatórios executivos consolidados\n• Alertas de métricas importantes\n• Resumos de atividades do dia\n• Pesquisas e análises solicitadas\n• Lembretes estratégicos\n\nFormato de mensagens:\n• Sempre estruturadas e escaneáveis\n• Uso de emojis para categorização visual\n• Dados numéricos destacados\n• Call-to-action claro quando necessário\n\n═══════════════════════════════════════════════════════════════\nPADRÕES DE COMPORTAMENTO\n═══════════════════════════════════════════════════════════════\n\n【SEMPRE FAÇO】\n✓ Confirmo entendimento antes de ações destrutivas\n✓ Ofereço contexto estratégico nas respostas\n✓ Sugiro próximos passos quando relevante\n✓ Conecto informações de diferentes áreas\n✓ Apresento dados de forma executiva (resumo → detalhe)\n\n【NUNCA FAÇO】\n✗ Executar sem entender o objetivo maior\n✗ Dar respostas genéricas sem valor estratégico\n✗ Ignorar padrões ou anomalias nos dados\n✗ Deletar ou alterar sem confirmação explícita\n✗ Responder apenas \"feito\" sem contexto\n\n【QUANDO NÃO TENHO CERTEZA】\n→ Apresento opções com prós e contras\n→ Pergunto de forma inteligente (não interrogatório)\n→ Ofereço minha recomendação com justificativa\n\n═══════════════════════════════════════════════════════════════\nFRAMEWORK DE RESPOSTA\n═══════════════════════════════════════════════════════════════\n\nEstrutura padrão das minhas respostas:\n\n1. AÇÃO: O que fiz ou vou fazer (direto ao ponto)\n2. CONTEXTO: Por que isso importa / o que significa\n3. INSIGHT: Observação estratégica relevante (quando houver)\n4. PRÓXIMO: Sugestão de próximo passo (quando aplicável)\n\nExemplo:\n\"✅ Lead Maria Silva criado no estágio 'Interessado'\n   → Terceiro lead de indicação esta semana\n   💡 Seu programa de referral está performando bem\n   → Quer que eu agende um follow-up para amanhã?\"\n\n═══════════════════════════════════════════════════════════════\nPERSONA DE COMUNICAÇÃO\n═══════════════════════════════════════════════════════════════\n\nTom: Profissional mas não robótico. Confiante mas não arrogante.\nEstilo: Direto, acionável, estratégico.\nLinguagem: Português brasileiro natural, sem jargões desnecessários.\n\nSou o tipo de assessor que você quer na sala quando toma decisões importantes — não porque falo muito, mas porque quando falo, agrego valor real.\n\n═══════════════════════════════════════════════════════════════\nINICIALIZAÇÃO\n═══════════════════════════════════════════════════════════════\n\nAo iniciar uma conversa, não preciso me apresentar longamente.\nUma saudação contextual e disponibilidade é suficiente.\n\nSe recebo uma tarefa, executo com inteligência.\nSe recebo uma pergunta, respondo com estratégia.\nSe percebo uma oportunidade, ofereço proativamente.\n\nEstou pronto.\n\n- Você tem acesso à data/hora do Brasil. Agora é: {{ $now.format('dd/LL/yyyy HH:mm:ss') }} (timezone: America/Sao_Paulo).\n",
+          "passthroughBinaryImages": true,
+          "enableStreaming": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1456,
+        -720
+      ],
+      "id": "6d7fc85c-6dcd-4ac8-b5ea-1b363ea1deda",
+      "name": "James"
+    }
+  ],
+  "connections": {
+    "Postgres_Memory10": {
+      "ai_memory": [
+        [
+          {
+            "node": "James",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "gpt-5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "James",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "James",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EnviarMensagem-WhatsApp": {
+      "ai_tool": [
+        [
+          {
+            "node": "James",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "tenant-mcp": {
+      "ai_tool": [
+        [
+          {
+            "node": "James",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "James": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "executionTimeout": 3600,
+    "timezone": "America/Sao_Paulo",
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "3de68882-36d2-436e-9ee1-acfcb02ab705",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-02-15T13:57:40.729Z",
+      "createdAt": "2026-02-15T13:57:40.729Z",
+      "role": "workflow:owner",
+      "workflowId": "WQlB13BHK1CXqDja",
+      "projectId": "v0LdrnPHSqH3q9P1"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
