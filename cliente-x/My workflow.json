@@ -1,0 +1,198 @@
+{
+  "updatedAt": "2026-02-24T17:51:49.248Z",
+  "createdAt": "2026-02-24T02:43:27.988Z",
+  "id": "sGWrrf6txmJU0LZ9",
+  "name": "My workflow",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        0
+      ],
+      "id": "80972212-c42d-4b15-8475-8a901c5a6043",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e8c973ab-3d7c-45fd-be52-3e6551339c23",
+              "name": "arquivo",
+              "value": "cliente-x/4ThHWCejKKJrZYfX.json",
+              "type": "string"
+            },
+            {
+              "id": "5131df5e-28a8-4c15-b2fa-d2b5d1daf7ef",
+              "name": "dono",
+              "value": "asanabalada",
+              "type": "string"
+            },
+            {
+              "id": "02b16d1b-98ef-44fd-8867-527ee15d6f0f",
+              "name": "repositorio",
+              "value": "worflows",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -512,
+        0
+      ],
+      "id": "74aa9b5e-4673-4273-8f54-eba2993ff7be",
+      "name": "infos Basicas"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "={{ $json.dono }}",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "={{ $json.repositorio }}",
+          "mode": "name"
+        },
+        "filePath": "={{ $json.arquivo }}",
+        "additionalParameters": {}
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        -304,
+        0
+      ],
+      "id": "e18c0422-a735-4df9-8902-6211e4dc7934",
+      "name": "Get a file",
+      "webhookId": "ff75c61a-f849-4d71-9173-0b6ba9461dea",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "FnwUu4CrnROouTyU",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -96,
+        0
+      ],
+      "id": "58f3e0f2-9b30-4fa0-8282-a42d9cbcb9f1",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "workflowId": {
+          "__rl": true,
+          "value": "={{ $json.data.id }}",
+          "mode": "id"
+        },
+        "workflowObject": "={{ JSON.stringify($json.data) }}",
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "position": [
+        112,
+        0
+      ],
+      "id": "e830897a-9362-4833-af64-1745043931c7",
+      "name": "Update a workflow",
+      "credentials": {
+        "n8nApi": {
+          "id": "bDkMKRrGDlhiUwcl",
+          "name": "Backups"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "infos Basicas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "infos Basicas": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Update a workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "de653cfd-dad2-4019-b203-9e7ce269dec0",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-02-24T02:43:27.988Z",
+      "createdAt": "2026-02-24T02:43:27.988Z",
+      "role": "workflow:owner",
+      "workflowId": "sGWrrf6txmJU0LZ9",
+      "projectId": "v0LdrnPHSqH3q9P1"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
