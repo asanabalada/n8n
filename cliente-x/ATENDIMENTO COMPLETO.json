@@ -1,0 +1,994 @@
+{
+  "updatedAt": "2026-02-24T17:56:52.557Z",
+  "createdAt": "2026-01-15T22:34:46.321Z",
+  "id": "J6xp5oZEVDLj6Wds",
+  "name": "ATENDIMENTO COMPLETO",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "Responses API",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Celular",
+              "condition": "eq",
+              "keyValue": "={{ $json.body.data.key.remoteJid }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        -416
+      ],
+      "id": "60020ba8-24f5-41a5-aa2d-97a5b00ccfef",
+      "name": "Busca User BD",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "B74cp4lj0rZffYgx",
+          "name": "Supabase Response"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "Responses API",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "Nome",
+              "fieldValue": "={{ $('Webhook').item.json.body.data.pushName }}"
+            },
+            {
+              "fieldId": "Celular",
+              "fieldValue": "={{ $('Webhook').item.json.body.data.key.remoteJid }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        384,
+        -336
+      ],
+      "id": "d5d19483-8fc2-4f83-8b58-191c9338ab4e",
+      "name": "Cadastra User no BD",
+      "credentials": {
+        "supabaseApi": {
+          "id": "B74cp4lj0rZffYgx",
+          "name": "Supabase Response"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f24f6e39-5786-4433-8192-4fad25d711b7",
+              "leftValue": "={{ $json.Celular }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        80,
+        -416
+      ],
+      "id": "cafeba17-a1cd-4cdd-9cac-2e9e184b10f6",
+      "name": "Valida Cadastro"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "Responses API",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Celular",
+              "condition": "eq",
+              "keyValue": "={{ $('Cadastra User no BD').item.json.Celular }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "Conversations_ID",
+              "fieldValue": "={{ $json.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        800,
+        -336
+      ],
+      "id": "abe3779d-128c-4d46-874d-e0e48d8471a8",
+      "name": "Atualiza linha BD",
+      "credentials": {
+        "supabaseApi": {
+          "id": "B74cp4lj0rZffYgx",
+          "name": "Supabase Response"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "conversation",
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $('Webhook').item.json.body.data.message.conversation }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        592,
+        -336
+      ],
+      "id": "f5e14e91-2d82-42f3-952a-fbb357171e5b",
+      "name": "Create a conversation",
+      "credentials": {
+        "openAiApi": {
+          "id": "ZGZmDyG3mcaRmuUn",
+          "name": "Response"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini-2025-04-14",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI-2025-04-14"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "={{ $json.conversa.toJsonString() }}"
+            },
+            {
+              "role": "system",
+              "content": "=# SYSTEM PROMPT - AGENTE COMERCIAL\n\n## =========================================================\n## INSTRUÇÕES E PERSONALIDADE DO AGENTE\n## =========================================================\n\n**HOJE É:** {{ $now.format('FFFF') }}\n**TELEFONE DO CONTATO:** {{ $('Merge').item.json.Celular }}\n**NOME DO CLIENTE:** {{ $('Merge').item.json.Nome }}\n**ID DA CONVERSA:** {{ $('Merge').item.json.id }}\n\n-----------------------\n\n## IDENTIDADE DO AGENTE\n\n**Nome:** Vinicius\n**Empresa:** Winner Mídia São Roque\n**Função:** Consultor(a)\n**Idioma:** Português do Brasil\n\nVocê é Vinicius, consultor(a) da Winner Mídia São Roque. Seu papel é atender clientes de forma profissional, consultiva e eficiente.\n\n-----------------------\n\n## MISSÃO E OBJETIVO\n\n### Objetivo Principal\nAtuar como consultor comercial da Winner Mídia São Roque, com o objetivo de:\n\nQualificar empresas interessadas em divulgação local através de mídia indoor em totens digitais.\n\nEntender o perfil do negócio, segmento e objetivo do cliente antes de apresentar qualquer proposta.\n\nExplicar de forma clara e consultiva como funcionam os totens, seus pontos estratégicos e diferenciais.\n\nDirecionar o cliente para o totem mais adequado ao seu público.\n\nGerar interesse real e encaminhar leads qualificados para atendimento humano quando houver intenção clara de contratação.\n\nManter uma comunicação profissional, humanizada e sem abordagem agressiva de vendas.\n\n### Escopo de Atuação\nPode apresentar planos e valores disponíveis, mas o fechamento deve ser feito por um humano.\n\n-----------------------\n\n## PERSONALIDADE E ESTILO DE COMUNICAÇÃO\n\n### Tom de Conversa\nMantenha sempre um tom **comercial e objetivo** em todas as interações.\n\n### Uso de Emojis\nutilize emojis com moderação (máximo 1-2 por mensagem, apenas quando apropriado)\n\n### Estilo de Resposta\nMensagens curtas e diretas (estilo WhatsApp), máximo 3-4 linhas por mensagem.\n\n### Diretrizes de Comunicação\n- Seja sempre cordial e educado\n- Use linguagem clara e acessível\n- Evite jargões técnicos desnecessários\n- Personalize o atendimento usando o nome do cliente\n- Demonstre interesse genuíno em ajudar\n\n-----------------------\n\n## PRODUTOS E SERVIÇOS\n\n### Catálogo Disponível\nTemos duas opções de contratação, todas com pagamento mensal boleto ou cartão de crédito:\n\n📅 Plano Semestral – 6 meses\n💲 R$ 247,90/mês\n🔖 Pagando até o dia 10 ou 20, fica R$ 197,90/mês\n\n📅 Plano Trimestral – 3 meses\n💲 R$ 327,90/mês\n🔖 Pagando até o dia 10 ou 20, fica R$ 287,90/mês\n\nEsses valores é para 1 totem, caso o cliente queira mais totens vou passar as regras abaixo:\n2 totens:\n\n📅 Plano Semestral — 6 meses\n\nValor base com desconto: R$ 197,90 por totem\nTotens\tValor por Totem\tEconomia por Totem\n1\tR$ 197,90\t—\n2\tR$ 184,90\t↓ R$ 13\n3\tR$ 169,90\t↓ R$ 28\n4\tR$ 154,90\t↓ R$ 43\n5\tR$ 139,90\t↓ R$ 58\n6\tR$ 124,90\t↓ R$ 73\n\n\n📅 Plano Trimestral — 3 meses\nValor base com desconto: R$ 287,90 por totem\nTotens\tValor por Totem\tEconomia por Totem\n1\tR$ 287,90\t—\n2\tR$ 269,90\t↓ R$ 18\n3\tR$ 249,90\t↓ R$ 38\n4\tR$ 229,90\t↓ R$ 58\n5\tR$ 209,90\t↓ R$ 78\n6\tR$ 189,90\t↓ R$ 98\n\nTemos 2 totens na cidade de São Roque:\n\n🔸 Supermercado São Roque – Matriz\n📍 Totem no Supermercado São Roque – Matriz\n➡️ Fluxo médio de 6 mil pessoas por dia\n➡️ Totem de 1,80m de altura\n➡️ Posicionado em frente às filas de Self Checkout e Açougue\n➡️ Atenção total durante a fila de pagamento\n➡️ Horário de atendimento da loja: De segunda a segunda das 6:00h às 22:00h.\n\n🔸 Bar Estilla – Roteiro do Vinho\n📍 Totem no Bar Estilla – Roteiro do Vinho\n➡️ Média de 2.000 pessoas por final de semana\n➡️ Tempo médio de permanência: 1h30 a 2h\n➡️ Totem de 1,80m de altura\n➡️ Público adulto e turístico\n\nTemos 1 totem na cidade de Cotia que fica em Tijuco Preto:\n\n🔸 Supermercado São Roque – Shopping Central Park (Tijuco / Cotia)\n📍 Totem no Supermercado São Roque – Shopping Central Park\n➡️ Fluxo médio de 3.800 pessoas por dia\n➡️ Totem de 1,80m de altura\n➡️ Posicionado em fila de caixa\n➡️ Público familiar e regional\n➡️ Horário de atendimento da loja: De segunda a segunda das 6:00h às 22:00h.\n\nTemos 1 totem na cidade de Mairinque:\n\n🔸 Supermercado Mairinque – Centro\n📍 Totem no Supermercado Mairinque – Centro\n➡️ Fluxo médio de 3.800 pessoas por dia\n➡️ Totem de 1,80m de altura\n➡️ Posicionado na entrada do supermercado\n➡️ Público local e recorrente\n➡️ Horário de atendimento da loja: De segunda a segunda das 7:00h às 21:00h.\n\nTemos 1 totem na cidade de Ibiúna:\n\n🔸 Academia SkyFit – Ibiúna\n📍 Totem na Academia SkyFit – Ibiúna\n➡️ 2.800 alunos matriculados\n➡️ Tempo médio de permanência: 1 hora ou mais\n➡️ Totem de 1,80m de altura\n➡️ Público focado em saúde e bem-estar\n➡️ Horário de atendimento da academia: De segunda a sexta das 5:00h às 23:00h. Sábado das 8:00h às 17:00h e Domingo das 8:00h às 14:00h.\n\nTemos 1 totem na cidade de Cotia que fica na Granja Viana:\n\n🔸 Salão Fast Escova – Granja Viana\n📍 Totem no Salão Fast Escova – Granja Viana\n➡️ Público feminino, classe média a média alta\n➡️ Tempo médio de permanência: 50 minutos a 1h30\n➡️ Totem de 1,80m de altura\n➡️ Ambiente premium e atenção contínua\n➡️ Horário de atendimento do salão academia: De segunda a sábado das 8:00h às 20:00h. Domingo das 9:00h às 15:00h.\n\n**IMPORTANTE:** Informar que criamos os vídeos gratuitamente caso não tenha uma agência para criar.\n\n**IMPORTANTE:** Trabalhamos com 1 segmento por totem, no máximo 20 anúncios.\n\n**IMPORTANTE:** Anúncios de 20 segundos, passa em uma média de 9 vezes por hora.\n\n### Formas de Pagamento\n- Boleto\n- Cartão de Crédito\n\n\n\n-----------------------\n\n## QUALIFICAÇÃO DO LEAD\n\n### Perguntas Obrigatórias\nFaça as seguintes perguntas para qualificar o lead:\n\n1. Qual totem quer anunciar\n\n\n\n**IMPORTANTE:** Faça as perguntas de forma natural e conversacional, não como um interrogatório.\n**IMPORTANTE:** Fale das vantagens da mídia indoor em relação ao outdoor.\n**IMPORTANTE:** Fazer com que o cliente sinta vontade de ver seu negócio sendo visto.\n\n-----------------------\n\n## DADOS PARA FECHAMENTO\n\n### Informações a Coletar\nAntes de finalizar a venda, colete obrigatoriamente:\n\n1. Nome completo do titular\n2. CPF (pessoa física) ou CNPJ (pessoa jurídica)\n3. E-mail para contato\n4. Data preferida para vencimento da fatura (dia 10 ou 15)\n\n-----------------------\n\n## REGRAS CRÍTICAS\n\n**ATENÇÃO: Estas regras são INVIOLÁVEIS.**\n\n1. NUNCA prometa resultados ou benefícios não garantidos\n2. NUNCA invente valores ou promoções\n3. Mantenha-se sempre no escopo definido\n4. Transfira para humano quando solicitado\n\n\n\n-----------------------\n\n## FERRAMENTAS DISPONÍVEIS\n\n- `consultar_produtos - Buscar produtos e preços`\n- `salvar_lead - Registrar dados do cliente`\n- `criar_pedido - Finalizar pedido no sistema`\n- `transferir_para_humano - Escalar atendimento`\n\n\n\n**Uso das Ferramentas:** Utilize proativamente para fornecer informações precisas.\n\n-----------------------\n\n## HORÁRIO DE ATENDIMENTO\n\nSegunda a Sexta: 09h às 20h\nSábado: 09h às 16h\n\n-----------------------\n\n## EXEMPLOS DE ATENDIMENTO\n\n### Primeiro Contato\n- Cliente: \"Olá, quero saber sobre os totens\"\n- Você:\n  - Cumprimente e se apresente\n  - Pergunte totem interessa\n  - Apresente opções e benefícios\n  - Qualifique o lead com as perguntas\n\n### Fechamento de Venda\n- Cliente: \"Quero anunciar no totem X\"\n- Você:\n  - Colete dados para cadastro\n  - Peça o envio do logo e informações para criação do vídeo\n  - Finalize o pedido\n\n-----------------------\n\n## OBSERVAÇÕES FINAIS\n\n1. **Início:** Apresente-se e pergunte como ajudar\n2. **Durante:** Siga o fluxo de qualificação\n3. **Fechamento:** Colete todos os dados e confirme\n4. **Despedida:** Agradeça e reforce disponibilidade\n\nSeu objetivo é proporcionar a melhor experiência ao cliente."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "conversationId": "={{ $('Merge').item.json.Conversations_ID }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        3728,
+        -448
+      ],
+      "id": "b3cff2ae-8387-47d5-98f3-7d21a0a286f7",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "ZGZmDyG3mcaRmuUn",
+          "name": "Response"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "d5f504f3-398d-4b00-96ce-46ee8b76ca57",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -624,
+        -432
+      ],
+      "id": "0cb4ace1-e33b-4946-98ef-1e6cf046210d",
+      "name": "Webhook",
+      "webhookId": "d5f504f3-398d-4b00-96ce-46ee8b76ca57"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1072,
+        -416
+      ],
+      "id": "522e1174-2b7d-44aa-b608-1fd844f9593b",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "teste",
+        "remoteJid": "={{ $('Webhook').item.json.body.data.key.remoteJid }}",
+        "messageText": "={{ $json.output[0].content[0].text }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        4064,
+        -448
+      ],
+      "id": "7a79e1a9-d458-46b8-801f-2cc32ec54323",
+      "name": "Enviar texto",
+      "credentials": {
+        "evolutionApi": {
+          "id": "4PLiTSokQyWQZw7C",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "91b6a0c7-c7fd-4c94-b2b2-aa3aa0436fe0",
+              "leftValue": "={{ $json.body.data.key.fromMe.toString() }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -400,
+        -432
+      ],
+      "id": "ba61f47a-7249-4f8a-8482-f7bb4449adea",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        -576
+      ],
+      "id": "ccdcfa70-853e-403e-a02f-21b9b3827b75",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('Merge').item.json.Celular }}",
+        "messageData": "={{ $json.mensagem.user }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        2656,
+        -448
+      ],
+      "id": "e9075ae5-7774-43e6-8c8d-d23dcfb2fe50",
+      "name": "Salva Mensagem BD temp",
+      "credentials": {
+        "redis": {
+          "id": "DsbQ8uPQ9EntbTbQ",
+          "name": "Redis - Agente"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "conversa",
+        "key": "={{ $('Merge').item.json.Celular }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        2864,
+        -448
+      ],
+      "id": "59fcd17d-5823-4ce6-9f9b-baaf308d32b0",
+      "name": "Pega MSG BD temp",
+      "credentials": {
+        "redis": {
+          "id": "DsbQ8uPQ9EntbTbQ",
+          "name": "Redis - Agente"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "da80943b-3295-4d17-bfb5-13c51b201c9a",
+              "leftValue": "={{ $json.conversa.length }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3056,
+        -448
+      ],
+      "id": "ed47bb4f-7218-47aa-b868-a784906c83bf",
+      "name": "Valida se é 1º Msg"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('Merge').item.json.Celular }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        4256,
+        -448
+      ],
+      "id": "c22a745f-707b-43c0-862c-fe9d67abd7cb",
+      "name": "Deleta Msg BD Temp",
+      "credentials": {
+        "redis": {
+          "id": "DsbQ8uPQ9EntbTbQ",
+          "name": "Redis - Agente"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3296,
+        -304
+      ],
+      "id": "6110e23e-ee73-4b31-99d8-0fb138910820",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "conversa",
+        "key": "={{ $('Merge').item.json.Celular }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        3536,
+        -448
+      ],
+      "id": "7b5cd780-e664-428f-b104-e20275beac2b",
+      "name": "Pega todas Msgs do BD Temp",
+      "credentials": {
+        "redis": {
+          "id": "DsbQ8uPQ9EntbTbQ",
+          "name": "Redis - Agente"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Webhook').item.json.body.data.messageType }}",
+                    "rightValue": "conversation",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "bb32219b-4dab-4a75-816d-34aa55adae25"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "TEXTO"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "680e85cf-bb7d-44ed-909f-5f1e5b04f90f",
+                    "leftValue": "={{ $('Webhook').item.json.body.data.messageType }}",
+                    "rightValue": "audioMessage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "AUDIO"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "cc4701c0-45fd-4f96-a428-f1d06fbf9692",
+                    "leftValue": "={{ $('Webhook').item.json.body.data.messageType }}",
+                    "rightValue": "imageMessage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "IMAGEM"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        1296,
+        -432
+      ],
+      "id": "7562e688-ed3e-49d1-a6a1-662f8b4466bc",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfa53c8e-9418-4b9c-97fd-2b11760c977a",
+              "name": "mensagem.user",
+              "value": "={{ $('Webhook').item.json.body.data.message.conversation }} {{ $json.text }} {{ $json['0'].content[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2416,
+        -448
+      ],
+      "id": "a59621af-e139-4bf5-8930-4af208af0ed2",
+      "name": "Junta Tipo MSG"
+    },
+    {
+      "parameters": {
+        "resource": "chat-api",
+        "operation": "get-media-base64",
+        "instanceName": "teste",
+        "messageId": "={{ $('Webhook').item.json.body.data.key.id }}",
+        "convertToMp4": true
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1584,
+        -320
+      ],
+      "id": "d058097e-f3c2-46df-a893-5acca93c8ed8",
+      "name": "Obter m dia em base64",
+      "credentials": {
+        "evolutionApi": {
+          "id": "4PLiTSokQyWQZw7C",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        1984,
+        -320
+      ],
+      "id": "8a6d41df-4015-4813-80a5-aaab5196e649",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "ZGZmDyG3mcaRmuUn",
+          "name": "Response"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data.base64",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1792,
+        -320
+      ],
+      "id": "afe80bb1-eaca-4899-a709-2958df690f3c",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "resource": "chat-api",
+        "operation": "get-media-base64",
+        "instanceName": "teste",
+        "messageId": "={{ $('Webhook').item.json.body.data.key.id }}",
+        "convertToMp4": true
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1584,
+        -112
+      ],
+      "id": "8d5d50b2-8458-4747-bda0-ddf84bca20da",
+      "name": "Obter m dia em base",
+      "credentials": {
+        "evolutionApi": {
+          "id": "4PLiTSokQyWQZw7C",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data.base64",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1792,
+        -112
+      ],
+      "id": "817f895b-d5da-440e-81d0-7d5e4668f8ce",
+      "name": "Convert to File1"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini-2024-07-18",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI-2024-07-18"
+        },
+        "text": "Descreva o que tem nesta imagem.",
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        2000,
+        -112
+      ],
+      "id": "97aa7b35-b19c-4da7-8161-a2d2c0e35b7a",
+      "name": "Analyze image",
+      "credentials": {
+        "openAiApi": {
+          "id": "ZGZmDyG3mcaRmuUn",
+          "name": "Response"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 20
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3280,
+        -624
+      ],
+      "id": "d9cc0105-c3e1-450a-94df-7374aec6ffd2",
+      "name": "Aguarda 20 Segundos",
+      "webhookId": "7c7ebb7b-c304-4942-888a-327f7d838912"
+    }
+  ],
+  "connections": {
+    "Busca User BD": {
+      "main": [
+        [
+          {
+            "node": "Valida Cadastro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valida Cadastro": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cadastra User no BD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cadastra User no BD": {
+      "main": [
+        [
+          {
+            "node": "Create a conversation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualiza linha BD": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Create a conversation": {
+      "main": [
+        [
+          {
+            "node": "Atualiza linha BD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Enviar texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Busca User BD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Salva Mensagem BD temp": {
+      "main": [
+        [
+          {
+            "node": "Pega MSG BD temp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pega MSG BD temp": {
+      "main": [
+        [
+          {
+            "node": "Valida se é 1º Msg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valida se é 1º Msg": {
+      "main": [
+        [
+          {
+            "node": "Aguarda 20 Segundos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar texto": {
+      "main": [
+        [
+          {
+            "node": "Deleta Msg BD Temp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pega todas Msgs do BD Temp": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Junta Tipo MSG",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Obter m dia em base64",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Junta Tipo MSG": {
+      "main": [
+        [
+          {
+            "node": "Salva Mensagem BD temp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obter m dia em base64": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Junta Tipo MSG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obter m dia em base": {
+      "main": [
+        [
+          {
+            "node": "Convert to File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File1": {
+      "main": [
+        [
+          {
+            "node": "Analyze image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze image": {
+      "main": [
+        [
+          {
+            "node": "Junta Tipo MSG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguarda 20 Segundos": {
+      "main": [
+        [
+          {
+            "node": "Pega todas Msgs do BD Temp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "0d7e746f-7dc1-409a-a813-5a134adbdeea",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-01-15T22:34:46.321Z",
+      "createdAt": "2026-01-15T22:34:46.321Z",
+      "role": "workflow:owner",
+      "workflowId": "J6xp5oZEVDLj6Wds",
+      "projectId": "v0LdrnPHSqH3q9P1"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
