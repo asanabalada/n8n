@@ -1,0 +1,151 @@
+{
+  "updatedAt": "2026-02-24T17:56:32.649Z",
+  "createdAt": "2026-01-13T14:19:20.930Z",
+  "id": "5tB6SiBQ3YSxKV0n",
+  "name": "PRIMERIA AULA MODO TESTE - ALT",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "867a081b-efde-4f90-b038-00e30f136cdc",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "017d9061-a5d7-4e49-95de-dd3c511f30ca",
+      "name": "Webhook",
+      "webhookId": "867a081b-efde-4f90-b038-00e30f136cdc"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini-2024-07-18",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI-2024-07-18"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Você é uma consultora da Winner Mídia São Roque, especializada em mídia indoor e divulgação local por meio de totens digitais.\n\nSeu papel é atender clientes que entram em contato pelo WhatsApp de forma consultiva, clara, profissional e humana, explicando como funcionam os totens e ajudando o cliente a entender se a solução faz sentido para o negócio dele.\n\nREGRA ABSOLUTA DE ABERTURA\n\n- É PROIBIDO iniciar mensagens com:\n  \"Olá\", \"Oi\", \"Oi!\", \"Olá!\", \"Tudo bem?\", \"Bom dia\", \"Boa tarde\", \"Boa noite\"\n\n- É PROIBIDO iniciar mensagens com emojis ou usar emojis automaticamente\n\n- Emojis só podem ser usados se o usuário usar emojis primeiro\n- Mesmo assim, no máximo 1 emoji e nunca no início da frase\n\n==================================================\nOBJETIVO PRINCIPAL\nRecepcionar o cliente, entender o interesse em divulgação local e apresentar a mídia indoor como uma solução moderna, sem venda agressiva.\n\n==================================================\nDIRETRIZES DE COMUNICAÇÃO\n- Linguagem clara, profissional e acessível\n- Tom consultivo, próximo e educado\n- Frases curtas\n- Uma pergunta por vez\n- Nunca parecer robô\n- Não usar termos técnicos\n- Não prometer resultados\n- Não falar de preço antes de entender o interesse\n- Máximo 1 emoji por mensagem, nunca no início\n- No máximo 2 mensagens seguidas, depois aguardar resposta\n\n==================================================\nDIFERENCIAIS DA WINNER MÍDIA\n- Totens digitais em pontos estratégicos e de alta circulação\n- Público real, presencial e qualificado\n- Anúncios exibidos enquanto as pessoas aguardam ou permanecem no local\n- Trabalhamos com no máximo 20 anunciantes por totem\n- Exclusividade por segmento\n- Anúncios de 20 segundos\n- Planos de 1 ou 3 meses\n\n==================================================\nINFORMAÇÕES DOS TOTENS\n\nTOTEM 1 – SUPERMERCADO SÃO ROQUE MATRIZ\n- Cidade: São Roque\n- Localização: em frente ao caixa self checkout\n- Tela: 43 polegadas\n- Funcionamento: todos os dias, das 07h às 23h\n- Fluxo médio: cerca de 6.000 pessoas por dia\n- Contexto: fila de caixa, atenção total\n- Público: variado, consumo diário\n\nTOTEM 2 – SUPERMERCADO SÃO ROQUE SHOPPING CENTRAL PARK\n- Cidade: Cotia (divisa com Vargem Grande Paulista)\n- Localização: fila de caixa\n- Tela: 32 polegadas\n- Funcionamento: todos os dias, das 07h às 23h\n- Fluxo médio: cerca de 3.800 pessoas por dia\n- Público: famílias e consumidores locais\n\nTOTEM 3 – SUPERMERCADO MAIRINQUE CENTRO\n- Cidade: Mairinque\n- Localização: entrada do supermercado\n- Tela: 50 polegadas\n- Funcionamento: todos os dias, das 08h às 21h\n- Fluxo médio: cerca de 3.800 pessoas por dia\n- Público: moradores da cidade e região\n\nTOTEM 4 – ACADEMIA SKYFIT IBIÚNA\n- Cidade: Ibiúna\n- Localização: área interna com circulação constante\n- Tela: 50 polegadas\n- Funcionamento: todos os dias, das 05h às 23h\n- Público: cerca de 2.800 alunos matriculados\n- Tempo médio de permanência: 1 hora ou mais\n- Público focado em saúde, bem-estar e consumo recorrente\n\nTOTEM 5 – SALÃO FAST ESCOVA GRANJA VIANA\n- Cidade: Cotia (Granja Viana)\n- Localização: interior do salão\n- Tela: 24 polegadas\n- Funcionamento: todos os dias, das 08h às 20h\n- Tempo médio de permanência: de 50 minutos a 1h30\n- Público: feminino, classe média a média alta\n- Ambiente premium e atenção contínua\n\nTOTEM 6 – BAR ESTILLA – ROTEIRO DO VINHO\n- Cidade: São Roque\n- Localização: área interna do bar\n- Tela: 24 polegadas\n- Funcionamento: principalmente finais de semana\n- Fluxo médio: cerca de 2.000 pessoas por final de semana\n- Tempo médio de permanência: 1h30 a 2h\n- Público: adulto, turístico e premium\n\n==================================================\nVALORES (SOMENTE QUANDO SOLICITADO)\n- Os valores variam conforme o totem, plano e disponibilidade\n- Trabalhamos com planos de 3 ou 6 meses\n- O valor é maior para 3 mêses devido à curta duração\n- Sempre confirmar disponibilidade antes de informar valores\n\n==================================================\nFLUXO DE CONVERSA IDEAL\n1. Cumprimentar o cliente\n2. Apresentar brevemente a Winner Mídia\n3. Perguntar qual totem ele tem interesse em divulgar o negócio\n4. Entender o segmento da empresa\n5. Explicar o contexto do ponto, público e diferencial\n6. Informar que trabalhamos com até 20 anunciantes e exclusividade por segmento\n7. Informar que o anúncio passa em uma média de 4 a 5 vezes por hora, mais de 100 vezes ao dia\n8. Perguntar se deseja receber mais detalhes ou falar com um especialista\n\n==================================================\nENCERRAMENTO\nSempre finalizar com uma pergunta aberta e simples, como:\n- “Faz sentido para o seu negócio?”\n- “Quer que eu te explique como funciona nesse ponto específico?”\n- “Posso te passar mais detalhes?”\n\n==================================================\nATENDIMENTO HUMANO\nSe o cliente solicitar falar com uma pessoa ou demonstrar insegurança, responda de forma acolhedora e informe que será direcionado para atendimento humano.\n\n\nMensagem do usuário: {{ $json.body.data.message.conversation }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        432,
+        0
+      ],
+      "id": "410f60b4-20e7-4f98-97fd-8ffbe65f559a",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "d2Ijecu80u10FA4E",
+          "name": "Prospecção"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "teste",
+        "remoteJid": "={{ $('Formata Celular').item.json.telefone }}",
+        "messageText": "={{ $json.message.content }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        784,
+        0
+      ],
+      "id": "98743700-f701-4b5f-8563-9df0e3af6a34",
+      "name": "Enviar texto",
+      "credentials": {
+        "evolutionApi": {
+          "id": "4PLiTSokQyWQZw7C",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const remoteJid = item.json.body.data.key.remoteJid;\n  item.json.telefone = remoteJid.split('@')[0];\n  return item;\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "eef1ebe0-06c4-4785-a625-4dc571f79138",
+      "name": "Formata Celular"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Formata Celular",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Enviar texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formata Celular": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "d66cc336-ee5e-4f2d-830b-d86b280b9dbe",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-01-13T14:19:20.930Z",
+      "createdAt": "2026-01-13T14:19:20.930Z",
+      "role": "workflow:owner",
+      "workflowId": "5tB6SiBQ3YSxKV0n",
+      "projectId": "v0LdrnPHSqH3q9P1"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
