@@ -1,0 +1,1096 @@
+{
+  "updatedAt": "2026-02-24T17:52:17.241Z",
+  "createdAt": "2026-01-28T01:05:21.885Z",
+  "id": "uOU4hUxiBRlGMNX0",
+  "name": "OFERTAS DO DIA MERCADO LIVRE MULTIGRUPOS",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://www.mercadolivre.com.br/ofertas?category=MLB1574#filter_applied=category&filter_position=4&origin=qcat",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        928,
+        640
+      ],
+      "id": "d31fe504-25c9-4db9-8307-e2f68dddce51",
+      "name": "HTTP ABRIR SITE"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "Nomes Produtos",
+              "cssSelector": ".poly-card__content > h3 > a",
+              "returnValue": "html",
+              "returnArray": true
+            },
+            {
+              "key": "Imagem Produtos",
+              "cssSelector": ".poly-card__portada > img",
+              "returnValue": "attribute",
+              "attribute": "data-src",
+              "returnArray": true
+            },
+            {
+              "key": "preco",
+              "cssSelector": "div.poly-card__content > div.poly-component__price",
+              "skipSelectors": ".andes-money-amount_discount",
+              "returnArray": true
+            },
+            {
+              "key": "link_compra",
+              "cssSelector": ".poly-card__content > h3 > a",
+              "returnValue": "attribute",
+              "attribute": "href",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        1136,
+        640
+      ],
+      "id": "2ade07e9-f9c0-4831-b2d2-b09bab4fc6b9",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "['Nomes Produtos'], ['Imagem Produtos'], preco, link_compra",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        640
+      ],
+      "id": "deca250b-7f9c-468f-ad6a-080f35560339",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3f378733-6b15-47df-a3a7-47b0208c159c",
+              "leftValue": "={{ $json['[\\'Nomes Produtos\\']'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "6f7c46d4-5c74-4cd4-9b0b-9f8276654bef",
+              "leftValue": "={{ $json['[\\'Imagem Produtos\\']'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "78570aa7-2f87-4f74-b83f-52929bcafc6b",
+              "leftValue": "={{ $json.preco }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "77f916c7-d4b9-476d-a4c8-7761fab7b884",
+              "leftValue": "={{ $json.link_compra }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1552,
+        640
+      ],
+      "id": "93707074-4963-4144-a5ee-88e02de498ea",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "type": "random"
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        640
+      ],
+      "id": "015819b7-1e4f-469b-8d58-ce7e2911c8a3",
+      "name": "Sort"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.mercadolivre.com.br/affiliate-program/api/v2/affiliates/createLink",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json, text/plain, */*"
+            },
+            {
+              "name": "accept-language",
+              "value": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7"
+            },
+            {
+              "name": "device-memory",
+              "value": "2"
+            },
+            {
+              "name": "downlink",
+              "value": "1.2"
+            },
+            {
+              "name": "dpr",
+              "value": "1"
+            },
+            {
+              "name": "ect",
+              "value": "4g"
+            },
+            {
+              "name": "newrelic",
+              "value": "eyJ2IjpbMCwxXSwiZCI6eyJ0eSI6IkJyb3dzZXIiLCJhYyI6Ijk4OTU4NiIsImFwIjoiMTgzNDg4Njc5MSIsImlkIjoiNjBiMjE3OGI1ZGI3OTIwNCIsInRyIjoiNDllMTVlZGQ1NzhiMzQ0NzJlNmVjYTQ2YzJhYTc5NzEiLCJ0aSI6MTc2MDAyOTkyNzI4MCwidGsiOiIxNzA5NzA3In19"
+            },
+            {
+              "name": "origin",
+              "value": "https://www.mercadolivre.com.br"
+            },
+            {
+              "name": "priority",
+              "value": "u=1, i"
+            },
+            {
+              "name": "referer",
+              "value": "https://www.mercadolivre.com.br/afiliados/linkbuilder"
+            },
+            {
+              "name": "rtt",
+              "value": "250"
+            },
+            {
+              "name": "sec-ch-ua",
+              "value": "\"Google Chrome\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\""
+            },
+            {
+              "name": "sec-ch-ua-mobile",
+              "value": "?0"
+            },
+            {
+              "name": "sec-ch-ua-platform",
+              "value": "\"Windows\""
+            },
+            {
+              "name": "sec-fetch-dest",
+              "value": "empty"
+            },
+            {
+              "name": "sec-fetch-mode",
+              "value": "cors"
+            },
+            {
+              "name": "sec-fetch-site",
+              "value": "same-origin"
+            },
+            {
+              "name": "traceparent",
+              "value": "00-49e15edd578b34472e6eca46c2aa7971-60b2178b5db79204-01, 00-26e47ef4b6fb5fe32b6e2065e60c19ab-26ea6c3a843f7c62-01"
+            },
+            {
+              "name": "tracestate",
+              "value": "1709707@nr=0-1-989586-1834886791-60b2178b5db79204----1760029927280"
+            },
+            {
+              "name": "user-agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "viewport-width",
+              "value": "654"
+            },
+            {
+              "name": "x-csrf-token",
+              "value": "FzxUQeSE-PkGXmwYUc2X3-NYiYG6pqt-oaNc"
+            },
+            {
+              "name": "x-newrelic-id",
+              "value": "XQ4OVF5VGwIHVFdVBwQBVlE="
+            },
+            {
+              "name": "cookie",
+              "value": "_csrf=vtKl4rDwNx0hPKGoxisKKQFu; c_ui-navigation=6.6.152; _mldataSessionId=127cb627-c7df-4eef-a70a-c7d577effc4b; _hjSession_720738=eyJpZCI6IjBhNzU5ZDc2LTYyYmEtNGY0MS04MzEwLTVkOTBlNGE5NTM0NyIsImMiOjE3NjAwMjg4NDkwNjUsInMiOjAsInIiOjAsInNiIjowLCJzciI6MCwic2UiOjAsImZzIjoxLCJzcCI6MH0=; _d2id=b928c6cd-4e7d-4152-9054-3aaef22f0856; NSESSIONID_qrtsid=s%3AViFdrK5rVVeahjbJ5L7B2-5P8TJaelAc.DOw%2BuwQNDiVXUGdRcOQoVMj62eAzdFdtuvkDQm%2FARVM; orguserid=t070Tdt4dh44; orguseridp=184690799; ftid=xnChh2MX660HEnxAptrLWaY1lcEs1kZ8-1760028411822; ssid=ghy-100912-JNUAWYNS9GOdTIXgFx7I15qoGfdq9j-__-184690799-__-1854723582788--RRR_0-RRR_0; orgnickp=ACHADINHODARAKEL; cookiesPreferencesNotLogged=%7B%22categories%22%3A%7B%22advertising%22%3Atrue%2C%22functionality%22%3Atrue%2C%22performance%22%3Atrue%2C%22traceability%22%3Atrue%7D%7D; cookiesPreferencesLoggedFallback=%7B%22userId%22%3A184690799%2C%22categories%22%3A%7B%22advertising%22%3Atrue%2C%22functionality%22%3Atrue%2C%22performance%22%3Atrue%2C%22traceability%22%3Atrue%7D%7D; cp=59695000; ml_cart-quantity=10; _hjSessionUser_720738=eyJpZCI6ImMxOTI1ZjA0LTRhMTItNWMzMi04ZWY3LTAyNjMxY2IwODkyNiIsImNyZWF0ZWQiOjE3NjAwMjg4NDkwNjAsImV4aXN0aW5nIjp0cnVlfQ==; _gcl_au=1.1.1431638421.1760029481; hide-cookie-banner=184690799-COOKIE_PREFERENCES_ALREADY_SET; _cq_duid=1.1760029508.4sQszqOQYAb22e7d; _cq_suid=1.1760029508.2mAD1aberQsOMo6w; _tt_enable_cookie=1; _ttp=01K74YY1S8QGGQPKWA7XWEGB37_.tt.2; _fbp=fb.2.1760029511930.84071946622468360; hide-cookie-banner_184690799=COOKIE_PREFERENCES_ALREADY_SET; _mldataSessionId=127cb627-c7df-4eef-a70a-c7d577effc4b; p_edsid=1b1ae8e1-d712-4083-8061-28dfc4979760-1760029558254; p_dsid=3038520b-fb0c-4d90-a869-2c4e6d637e4c-1760029558254; ttl=1760029574589; x-meli-session-id=armor.478cbf3765a224edc049773dcc2445169ca1f1263857241d9b40399b9dbe0a720b191b20f37ff92bd20e8a0c980db715166a3a220bb61fa74174293eef162ecdae4c358881fa9d5706578c097e10453e5ff2dceaf3a10c9a01d7347b2bdece9c.a790277b5a97cc2056ebf47e2bd7d858; _hjSessionUser_580848=eyJpZCI6IjEzY2VkMWViLTU0ZTUtNTYyZi05ZjgyLTZmYzdlOTI0MmEwNCIsImNyZWF0ZWQiOjE3NjAwMjk1NzQxODMsImV4aXN0aW5nIjp0cnVlfQ==; _hjSession_580848=eyJpZCI6ImJkOWQzNTJiLTAyOTgtNGI1Mi1iZjFkLWYwNDVmZTc0NzlhNCIsImMiOjE3NjAwMjk1NzQxOTAsInMiOjEsInIiOjAsInNiIjowLCJzciI6MCwic2UiOjAsImZzIjoxLCJzcCI6MH0=; cookiesPreferencesLogged=%7B%22userId%22%3A184690799%2C%22categories%22%3A%7B%22advertising%22%3Atrue%2C%22functionality%22%3Atrue%2C%22performance%22%3Atrue%2C%22traceability%22%3Atrue%7D%7D; nsa_rotok=eyJhbGciOiJSUzI1NiIsImtpZCI6IjMiLCJ0eXAiOiJKV1QifQ.eyJpZGVudGlmaWVyIjoiYmQ5MzNlOTUtN2M4ZC00NmMyLTg1OWQtYjQ3OTE3MjA5OGJlIiwicm90YXRpb25faWQiOiI0YWRhNGI3Mi04OTlkLTQ3NDgtOWQyYy0yNDI4MmM5N2ZkOGMiLCJwbGF0Zm9ybSI6Ik1MIiwicm90YXRpb25fZGF0ZSI6MTc2MDAzMDQ4NCwiZXhwIjoxNzYyNjIxODg0LCJqdGkiOiI4YTA2ODYxNi0zZDc3LTQwNmQtYTkxNy0zZjQzMDVmZjI0NWQiLCJpYXQiOjE3NjAwMjk4ODQsInN1YiI6ImJkOTMzZTk1LTdjOGQtNDZjMi04NTlkLWI0NzkxNzIwOThiZSJ9.D20_G95mQQT-DpR1yK_ScEjof5oV1fR0We0j5L_EDCf2zOFN6de6biUc279GTQh8I6pcrkubRj1qQEQPrDEmE423solGNZH27bNrxl5Q5muWahrDRzS_N9wDCWbgAID8EYteYwz_nEYKxTrj5NkZ7YmDZQYMMCW0Dm3A-zL0QDKmOAe6IBauXdnuKPsIT5Wi1xUIIMLIw19vr5LMp6bL3yttbyOzcMMummljyj2KnZHOjvjX5UEZgrFrrAOQ8n0dj10RCka7LyPBEWGQj3cJbh9UlmQHbaiOgicCTEdTXckF3xdNJ9RgRFAlTb5ZOdixreRnJ0qxLfBi_GHaOs5JTg; __rtbh.uid=%7B%22eventType%22%3A%22uid%22%2C%22id%22%3A%22184690799%22%2C%22expiryDate%22%3A%222026-10-09T17%3A11%3A48.245Z%22%7D; __rtbh.lid=%7B%22eventType%22%3A%22lid%22%2C%22id%22%3A%223VJUsgmkgHLcxxm54X6i%22%2C%22expiryDate%22%3A%222026-10-09T17%3A11%3A48.246Z%22%7D; _uetsid=19383790a53211f0a8973d782cda2644; _uetvid=1939cf60a53211f0aaf93332eec57336; cto_bundle=33UHwF9xaGlVWkhVeUo0eThmY05NOWwlMkYlMkIzUnNDMENOVHdZektCVXdmbU9xVVd3TnN0UmN3eEFNdjIyOUtsJTJGenhvR2NUbzJpU1IxNmFhaGl6eWpLVEdKREdtUFNhJTJGN2NYbnl0ZVJkUHlaUXc0OGZmWHhpbDdiMGNZb0ZOb0lxMWJET0JlbVp4M29tJTJCVVdOTG5meHI1UlhRam9rY200cFZobXlkUDBScTI2JTJGbGxFSk0lM0Q; ttcsid_C9SJ5SBC77UADFMAH8T0=1760029509434::obSl0OuLAewFetqVcb3t.1.1760029913119.0; _derived_epik=dj0yJnU9UkUxd2ZJdUlrMExmU3hjOGQ5TEIxWGxKZTN2dDFjTU8mbj1qaTdvSWlIb29rWm11T0FfcEIwc3FnJm09NCZ0PUFBQUFBR2puN05rJnJtPTQmcnQ9QUFBQUFHam43Tmsmc3A9Mg; _pin_unauth=dWlkPVptTXpaVEl4Wm1FdFl6bGpaUzAwTlROa0xUazFNVEF0T0dWbU5XRXlOR1F3T1dabQ; ttcsid=1760029509477::GR-6GyXmTVH-BVLYqoi8.1.1760029913846.0; ttcsid_CFVSC2JC77U0ARCJTCJ0=1760029509756::BAuCeYqopw-_Waamd1NB.1.1760029913850.0"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"urls\": [\"{{ $json.link_compra }},\"],\n  \"tag\": \"raan9534017\"\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        752,
+        1104
+      ],
+      "id": "4bf130df-a13b-4c1b-bbd1-d1014e840d05",
+      "name": "HTTP Request1",
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "116d0e1b-021c-4519-9d99-7869c33d4909",
+              "name": "nome_produtos",
+              "value": "={{ $('Sort').item.json['[\\'Nomes Produtos\\']'] }}",
+              "type": "string"
+            },
+            {
+              "id": "19aa1917-ebe4-4470-ba8e-c4bb34e75087",
+              "name": "imagem_produtos",
+              "value": "={{ $('Sort').item.json['[\\'Imagem Produtos\\']'] }}",
+              "type": "string"
+            },
+            {
+              "id": "8fe2e48b-779f-4e78-85a9-30bc9489872a",
+              "name": "preco_produtos",
+              "value": "={{ $('Sort').item.json.preco }}",
+              "type": "string"
+            },
+            {
+              "id": "2bc5eb87-d373-4f2e-967a-7265c51a1ed6",
+              "name": "link_produtos_afiliado",
+              "value": "={{ $json.urls[0].short_url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        960,
+        1104
+      ],
+      "id": "bf8cf8ea-4a8d-4cad-9981-9acde840233a",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4767041e-ebcb-4dc3-b993-1b159ef05369",
+              "leftValue": "={{ $json.link_produtos_afiliado }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1344,
+        1040
+      ],
+      "id": "b740e8f4-811d-4fc7-b6ad-d9a64ab6da03",
+      "name": "Filter1"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => ({\n\n  json: {\n\n    text: [\n\n      item.json['nome_produtos'],\n\n      item.json['preco_produtos'],\n\n      item.json['link_produtos_afiliado'],\n\n      \n\n    ],\n\n    attachments: item.json['imagem_produtos'],\n\n    \n\n  }\n\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        1136
+      ],
+      "id": "4ddef98b-5d3e-494a-b6e2-4f322bb75b7a",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b8c9cd0b-9f75-4458-8800-cbca235f70d0",
+              "name": "nome_produtos",
+              "value": "={{ $json.text[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "b78b1be0-4cff-4d5f-903a-a420a2aa9270",
+              "name": "preco_produtos",
+              "value": "={{ $json.text[1] }}",
+              "type": "string"
+            },
+            {
+              "id": "b57a1102-4634-45b3-9df6-f48659007e49",
+              "name": "link_afiliado",
+              "value": "={{ $json.text[2] }}",
+              "type": "string"
+            },
+            {
+              "id": "b5a63a65-1543-4327-816f-14754130dfc5",
+              "name": "imagem_produtos",
+              "value": "={{ $json.attachments }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1712,
+        1136
+      ],
+      "id": "c295bc3c-7890-49e5-8159-6b9e6001c1b6",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1968,
+        640
+      ],
+      "id": "75186daf-aa72-4190-8154-0a3c09ecbb14",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.nome_produtos }},{{ $json.preco_produtos }},{{ $json.link_afiliado }}",
+        "options": {
+          "systemMessage": "=<AgentInstructions>\n  <Função>\n    <Nome>Agente de Copywriting para Promoções Mercado Livre</Nome>\n    <Descrição>Especialista em criar mensagens promocionais persuasivas e visuais otimizadas para grupos de WhatsApp que direcionam para o Mercado Livre.</Descrição>\n    <DataAtual>{{$agora}}</DataAtual>\n  </Função>\n  \n  <Meta>\n    <Objetivo>Criar mensagens que geram desejo, conexão emocional e cliques para ofertas exclusivas do Mercado Livre através de copywriting visual e persuasivo.</Objetivo>\n  </Meta>\n  \n  <TomDeVoz>\n    <Estilo>Empolgante, visual e focado em transformação/benefícios emocionais</Estilo>\n    <Características>Acessível, entusiasmado, usa linguagem que desperta desejo e senso de exclusividade</Características>\n  </TomDeVoz>\n  \n  <EstruturaDaMensagem>\n    <Ordem>\n      1. Título transformacional em **negrito** e CAIXA ALTA (com 2-3 emojis relevantes)\n      2. Nome do produto em *itálico*\n      3. Preço original com ❌ e ~~riscado~~ (se disponível)\n      4. Preço promocional com 💚 em **negrito**\n      5. Percentual de desconto em **negrito** (se aplicável)\n      6. 2-3 benefícios principais com ✅ ou emojis\n      7. Informações de parcelamento SOMENTE SE VALIDADO\n      8. Call-to-action com emoji 👉 em **negrito**\n      9. Link do Mercado Livre\n      10. Frase de exclusividade do grupo com emoji 🔥🎯💖 em **negrito**\n    </Ordem>\n  </EstruturaDaMensagem>\n  \n  <InstruçõesDeFormatação>\n    <Regra>Título sempre em **negrito** e CAIXA ALTA com 2-3 emojis que representam o benefício emocional</Regra>\n    <Regra>Nome do produto sempre em *itálico* logo abaixo do título</Regra>\n    <Regra>Use ❌ antes do preço original com ~~riscado~~</Regra>\n    <Regra>Use 💚 antes do preço promocional em **negrito**</Regra>\n    <Regra>Percentual de desconto sempre em **negrito** com 💥</Regra>\n    <Regra>Call-to-action sempre em **negrito**</Regra>\n    <Regra>Frase de exclusividade do grupo sempre em **negrito**</Regra>\n    <Regra>Use quebras de linha estratégicas para criar \"respiração\" visual</Regra>\n    <Regra>Emojis liberados: use para criar impacto visual (2-3 no título, ✅ nos benefícios, 👉 no CTA, 1-2 na urgência)</Regra>\n    <Regra>Máximo de 15 linhas de texto total</Regra>\n    <Regra>Use \"A partir de R$\" quando houver variações de preço ou versões</Regra>\n    <Regra>Use \"Por apenas R$\" ou \"Por R$\" para preço fixo único</Regra>\n    <Regra>Sempre inclua centavos nos preços (R$ 99,90 e não R$ 99)</Regra>\n  </InstruçõesDeFormatação>\n  \n  <RegrasDePARCELAMENTO>\n    <RegraCRÍTICA>NUNCA mencione parcelamento sem validação matemática rigorosa</RegraCRÍTICA>\n    <Validação>\n      SOMENTE informe parcelamento se: (número de parcelas × valor da parcela) = preço total atual\n      \n      Exemplo VÁLIDO: \n      Preço: R$ 79,90 | Parcela: R$ 15,98 | Parcelas: 5\n      Validação: 5 × 15,98 = 79,90 ✅ PODE INFORMAR\n      \n      Exemplo INVÁLIDO:\n      Preço: R$ 2.986,00 | Parcela: R$ 142,22 | Parcelas: 21\n      Validação: 21 × 142,22 = 2.986,62 ≠ 2.986,00 ❌ NÃO INFORMAR\n      \n      Exemplo INVÁLIDO:\n      Preço: R$ 219,00 | Parcela: R$ 40,00 | Parcelas: 6\n      Validação: 6 × 40,00 = 240,00 ≠ 219,00 ❌ NÃO INFORMAR\n    </Validação>\n    <Formato>Se validado: \"💳 6x de R$ 36,50 sem juros\"</Formato>\n    <Alternativa>Se o parcelamento não validar ou tiver juros, OMITA COMPLETAMENTE essa linha da mensagem</Alternativa>\n    <Alternativa>É MELHOR omitir do que fornecer informação incorreta</Alternativa>\n    <Alternativa>Tolerância de arredondamento: máximo R$ 0,01 de diferença</Alternativa>\n  </RegrasDePARCELAMENTO>\n  \n  <GatilhosMentais>\n    <Gatilho>Transformação: \"TRANSFORME\", \"RENOVE\", \"ELEVE\", \"ARRASE\"</Gatilho>\n    <Gatilho>Exclusividade: \"Oferta exclusiva do nosso GRUPO!\", \"Só para membros\", \"Oferta válida só para o grupo\"</Gatilho>\n    <Gatilho>Benefício emocional: Foque no resultado/sentimento, não em especificações técnicas secas</Gatilho>\n    <Gatilho>Visual: Use emojis que criem imagem mental do produto e benefício</Gatilho>\n    <Gatilho>Acessibilidade: \"A partir de R$\" sugere que cabe no bolso</Gatilho>\n    <Gatilho>Urgência: \"Hoje\", \"Agora\", quando relevante</Gatilho>\n  </GatilhosMentais>\n  \n  <Restrições>\n    <Crítico>SEMPRE inclua \"Oferta exclusiva do nosso GRUPO!\" ou variação similar no final em **negrito**</Crítico>\n    <Crítico>NUNCA invente preços, parcelamentos ou informações que não foram fornecidas</Crítico>\n    <Crítico>NUNCA mencione parcelamento sem validação matemática - prefira omitir</Crítico>\n    <Crítico>Use apenas links do Mercado Livre fornecidos pelo usuário</Crítico>\n    <Crítico>Se não houver preço antigo, omita completamente essa linha (não invente)</Crítico>\n    <Crítico>Priorize benefício emocional sobre especificações técnicas</Crítico>\n    <Crítico>Máximo de um link por mensagem</Crítico>\n    <Crítico>Título sempre em **negrito** e nome do produto sempre em *itálico*</Crítico>\n  </Restrições>\n  \n  <ExemplosDeSaída>\n    <Exemplo1>\n      <Título>Exemplo padrão sem parcelamento</Título>\n      <Conteúdo>\n**TRANSFORME SUAS MELHORES RECORDAÇÕES EM DECORAÇÃO! 🤩📸🖼️**\n\n*Quadro decorativo mosaico Grande 5 peças personalizado sua imagem sua foto família Logo Sala*\n\n❌ ~~de: R$ 115,00~~\n💚 **A partir de: R$ 38,65**\n💥 **66% OFF**\n\n✅ Personalização total com suas fotos\n✅ Presente perfeito e único\n✅ Qualidade premium para sua casa\n\n👉 **CONFERE AQUI:**\nhttps://mercadolivre.com.br/exemplo\n\n🔥 **Oferta exclusiva do nosso GRUPO!**\n      </Conteúdo>\n      <Observação>Parcelamento omitido porque não foi fornecido ou não validou</Observação>\n    </Exemplo1>\n    \n    <Exemplo2>\n      <Título>Exemplo com parcelamento validado</Título>\n      <Conteúdo>\n**ARRASE COM CONFORTO E ESTILO! 👗💃✨**\n\n*Vestido Midi Floral Primavera/Verão - Tecido leve e modelagem que valoriza*\n\n❌ ~~de: R$ 149,90~~\n💚 **A partir de: R$ 79,90**\n💥 **47% OFF**\n💳 5x de R$ 15,98 sem juros\n\n✅ Tecido respirável e confortável\n✅ Caimento perfeito em todos os corpos\n\n👉 **GARANTIR O MEU:**\nhttps://mercadolivre.com.br/exemplo\n\n💖 **Oferta válida só para o nosso grupo!**\n      </Conteúdo>\n      <Observação>Parcelamento incluído porque validou: 5 × 15,98 = 79,90 ✅</Observação>\n    </Exemplo2>\n    \n    <Exemplo3>\n      <Título>Exemplo sem preço antigo</Título>\n      <Conteúdo>\n**ORGANIZE SUA CASA COM ESTILO! 🏠✨🧹**\n\n*Kit Organizador Multiuso 6 Compartimentos - Ideal para cozinha, quarto ou escritório*\n\n💚 **Por apenas: R$ 49,90**\n\n✅ Mais espaço e praticidade no dia a dia\n✅ Material resistente e durável\n✅ Facilita sua rotina\n\n👉 **APROVEITE AGORA:**\nhttps://mercadolivre.com.br/exemplo\n\n🎯 **Oferta exclusiva do nosso GRUPO!**\n      </Conteúdo>\n      <Observação>Sem preço antigo porque não foi fornecido - linha omitida corretamente</Observação>\n    </Exemplo3>\n    \n    <Exemplo4>\n      <Título>Exemplo eletrônicos premium</Título>\n      <Conteúdo>\n**ELEVE SUA TECNOLOGIA AO MÁXIMO! 📱⚡🔝**\n\n*Samsung Galaxy S24 FE 256GB 8GB RAM 5G Azul*\n\n❌ ~~de: R$ 3.999,00~~\n💚 **Por apenas: R$ 2.986,00**\n💥 **25% OFF**\n\n✅ Desempenho ultrarrápido para tudo que você deseja\n✅ Câmera poderosa para fotos incríveis\n✅ Conectividade 5G para navegar sem limites\n\n👉 **APROVEITE AGORA MESMO:**\nhttps://mercadolivre.com/sec/2cAgt6j\n\n🔥 **Oferta exclusiva do nosso GRUPO!**\n      </Conteúdo>\n      <Observação>Parcelamento omitido porque não validou matematicamente (21 × 142,22 = 2.986,62 ≠ 2.986,00)</Observação>\n    </Exemplo4>\n    \n    <ExemploRUIM>\n      <Conteúdo>\nORGANIZADOR MULTIUSO 🏠\nOrganizador multiuso - De R$89,90 por R$49,90 - 6x de R$10,00 sem juros - Compre [link] 🔥\n      </Conteúdo>\n      <MotivoRUIM>\n        1. PARCELAMENTO INCORRETO: 6 × 10 = 60 ≠ 49,90\n        2. Título sem **negrito**\n        3. Nome do produto sem *itálico*\n        4. Sem emojis estratégicos (❌💚)\n        5. Sem benefícios emocionais\n        6. Sem frase de exclusividade do grupo em negrito\n        7. Texto corrido sem quebras de linha\n        8. Não desperta desejo\n        9. Formatação de preços incorreta\n      </MotivoRUIM>\n    </ExemploRUIM>\n  </ExemplosDeSaída>\n  \n  <ProcessamentoDeInput>\n    <Passo1>Extraia todas as informações: nome do produto, descrição, preço antigo (se houver), preço atual, número de parcelas, valor da parcela, link</Passo1>\n    <Passo2>Se houver informação de parcelamento, VALIDE MATEMATICAMENTE: (parcelas × valor) = preço total (tolerância de R$ 0,01)</Passo2>\n    <Passo3>Se a validação FALHAR, IGNORE completamente o parcelamento - não mencione na mensagem</Passo3>\n    <Passo4>Calcule o percentual de desconto se preço antigo disponível: ((preço antigo - preço novo) / preço antigo) × 100</Passo4>\n    <Passo5>Identifique o BENEFÍCIO EMOCIONAL principal - o que o produto FAZ pela pessoa, não apenas o que ele É</Passo5>\n    <Passo6>Crie título transformacional baseado no benefício emocional identificado</Passo6>\n    <Passo7>Selecione 2-3 emojis que representam visualmente o produto e seu benefício</Passo7>\n    <Passo8>Formate o título em **negrito** e CAIXA ALTA</Passo8>\n    <Passo9>Formate o nome do produto em *itálico*</Passo9>\n  </ProcessamentoDeInput>\n  \n  <ChecklistFinal>\n    <Item>✓ Título em **ne"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1840,
+        1136
+      ],
+      "id": "1ac7c338-f449-4d2b-b8ab-14baf334a943",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1792,
+        1328
+      ],
+      "id": "7d99ebd0-1bb6-456d-a192-82b873192832",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "ZGZmDyG3mcaRmuUn",
+          "name": "WinnerMidia"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "123"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1936,
+        1328
+      ],
+      "id": "a091178f-04d2-451e-ac6c-f86f416655e0",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b70f0418-f8a1-4d55-a3a3-c08c1e85e548",
+              "name": "prompt",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "bb87262e-8243-4b72-9fe4-ec3095e7eb19",
+              "name": "imagem do produto",
+              "value": "={{ $('Edit Fields1').item.json.imagem_produtos }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        768,
+        1680
+      ],
+      "id": "486dfb09-48b2-4be6-bb5f-6ec08ca3e6e1",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json['imagem do produto'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        976,
+        1680
+      ],
+      "id": "15b9c3d4-b908-4cec-ab26-9878d40d85f6",
+      "name": "HTTP Request2",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "borderColor": "#FDB2D0",
+        "options": {
+          "format": "jpeg"
+        }
+      },
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        1680
+      ],
+      "id": "9e38980c-1740-4e0c-8abd-2a254c1b387f",
+      "name": "Edit Image"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "options": {
+          "encoding": "base64"
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        1680
+      ],
+      "id": "3e54a614-e43d-46cd-a48c-df138757e326",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "content": "## EXTRAÇÃO E TRATAMENTO DE DADOS",
+        "height": 448,
+        "width": 1472,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        656,
+        528
+      ],
+      "typeVersion": 1,
+      "id": "01e13e11-7295-4acf-8e34-2b6328e3fdf0",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## CONVERSÃO PARA O LINK DE AFILIADO",
+        "height": 448,
+        "width": 1024,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        656,
+        992
+      ],
+      "typeVersion": 1,
+      "id": "e127fac3-c2a7-4188-9d75-60f6a88e93c3",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## CRIA TEXTO PERSONALIZADO DO PRODUTO",
+        "height": 448,
+        "width": 448,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1696,
+        992
+      ],
+      "typeVersion": 1,
+      "id": "aa6853a6-cd27-49ed-bd4f-61c622e31ff2",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## ENVIA PROMOÇÃO PARA O GRUPO",
+        "height": 432,
+        "width": 1488,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        656,
+        1456
+      ],
+      "typeVersion": 1,
+      "id": "c4d55f69-6555-4ba9-b1b7-21047e4dd003",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4a51401f-5300-41e4-a6f2-22b2ad26ce3e",
+              "leftValue": "={{ $json.link_produtos_afiliado }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1136,
+        1104
+      ],
+      "id": "ce6f733a-71c6-4209-a5f3-94e9a9a0dc9b",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Link não foi convertido corretamente"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        1200
+      ],
+      "id": "0fa08059-1702-4025-bff5-70a7ee6dd162",
+      "name": "Stop and Error",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "operation": "send-image",
+        "instanceName": "teste",
+        "remoteJid": "=",
+        "media": "={{ $json.data }}",
+        "caption": "={{ $('Edit Fields2').item.json.prompt }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1696,
+        1488
+      ],
+      "id": "f605c4d5-71e9-48a7-b34e-1095f787869e",
+      "name": "Enviar imagem",
+      "credentials": {
+        "evolutionApi": {
+          "id": "4PLiTSokQyWQZw7C",
+          "name": "WinnerMidia"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "=*/15 9-20 * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        704,
+        640
+      ],
+      "id": "2153d1a1-9494-4d6b-9b20-f9beccf0029a",
+      "name": "A cada 15 minutos1"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "operation": "send-image",
+        "instanceName": "teste",
+        "remoteJid": "=",
+        "media": "={{ $json.data }}",
+        "caption": "={{ $('Edit Fields2').item.json.prompt }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1952,
+        1536
+      ],
+      "id": "6d142aa8-daaf-4e6d-ab66-f277302c54ef",
+      "name": "Enviar imagem1",
+      "credentials": {
+        "evolutionApi": {
+          "id": "4PLiTSokQyWQZw7C",
+          "name": "WinnerMidia"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "operation": "send-image",
+        "instanceName": "teste",
+        "remoteJid": "=",
+        "media": "={{ $json.data }}",
+        "caption": "={{ $('Edit Fields2').item.json.prompt }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1792,
+        1632
+      ],
+      "id": "3991aa86-b695-4b7d-8af6-e07f195956ff",
+      "name": "Enviar imagem3",
+      "credentials": {
+        "evolutionApi": {
+          "id": "4PLiTSokQyWQZw7C",
+          "name": "WinnerMidia"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "operation": "send-image",
+        "instanceName": "teste",
+        "remoteJid": "=",
+        "media": "={{ $json.data }}",
+        "caption": "={{ $('Edit Fields2').item.json.prompt }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1968,
+        1744
+      ],
+      "id": "8c3a642a-87a5-4da8-ac77-ef440ae3086b",
+      "name": "Enviar imagem4",
+      "credentials": {
+        "evolutionApi": {
+          "id": "4PLiTSokQyWQZw7C",
+          "name": "WinnerMidia"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "![LOGO](https://http2.mlstatic.com/D_NQ_NP_880958-MLA85125228867_052025-F.jpg)\n\n\n## Suporte e Implementação : https://bit.ly/workflowmercadolivre",
+        "height": 508,
+        "width": 736,
+        "color": 7
+      },
+      "id": "5f1a8777-ea1c-45b9-b8aa-485525f970f0",
+      "name": "Sticky Note36",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "```\n🔍 PEGAR O TOKEM\n```\nO token CSRF e alguns cookies têm validade limitada. Você precisa capturá-los novamente:\n\n**Como fazer:**\n\n1. Abra o Chrome/Edge em modo anônimo\n2. Faça login no Mercado Livre com a conta \n3. Acesse: https://www.mercadolivre.com.br/afiliados/linkbuilder\n4. Pressione **F12** (DevTools)\n5. Vá na aba **Network** (Rede)\n6. Filtre por **Fetch/XHR**\n7. Na página do Link Builder, gere um link de afiliado manualmente\n8. Procure pela requisição `createLink` na lista\n9. Clique com botão direito → **Copy** → **Copy as cURL**\n10. Cole em um editor de texto e extraia:\n    - O valor do header `cookie`\n    - O valor do header `x-csrf-token`\n\n### 2. **Substitua no n8n**\n\nAtualize apenas estes dois headers:\n- `x-csrf-token`: (novo valor)\n- `cookie`: (novo valor completo)\n\nAltere a tag no json\n\n{\n  \"urls\": [\"{{ $json.link_compra }}\"],\n  \"tag\": \"suatag\"\n}",
+        "height": 720,
+        "width": 630,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        16,
+        528
+      ],
+      "id": "ba5858fe-9c19-459c-96f3-b4b946fe07cd",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "![LOGO](https://i.postimg.cc/tR6ZtH1r/Gemini-Generated-Image-e0ou77e0ou77e0ou.png)",
+        "height": 588,
+        "width": 624,
+        "color": 7
+      },
+      "id": "b70bccab-ac89-4b15-b3ed-ffae80472bb3",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        1296
+      ]
+    }
+  ],
+  "connections": {
+    "HTTP ABRIR SITE": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Sort",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Edit Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Image": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Enviar imagem",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Enviar imagem1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Enviar imagem3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Enviar imagem4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A cada 15 minutos1": {
+      "main": [
+        [
+          {
+            "node": "HTTP ABRIR SITE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "02f238e5-31af-432b-a9c7-ebfe601b3da4",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-01-28T01:05:21.885Z",
+      "createdAt": "2026-01-28T01:05:21.885Z",
+      "role": "workflow:owner",
+      "workflowId": "uOU4hUxiBRlGMNX0",
+      "projectId": "v0LdrnPHSqH3q9P1"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
