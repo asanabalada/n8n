@@ -1,0 +1,1809 @@
+{
+  "updatedAt": "2026-03-04T03:48:06.365Z",
+  "createdAt": "2026-03-04T03:48:06.365Z",
+  "id": "YDcFLqVOjR3ySa4Y",
+  "name": "Gestão MultiAgenda de Funcionários",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "funcao"
+            },
+            {
+              "name": "data_inicio"
+            },
+            {
+              "name": "data_final"
+            },
+            {
+              "name": "email"
+            },
+            {
+              "name": "servico"
+            },
+            {
+              "name": "nome_cliente"
+            },
+            {
+              "name": "data_antiga"
+            },
+            {
+              "name": "remotejid"
+            },
+            {
+              "name": "preco_servico"
+            },
+            {
+              "name": "nome_agendado"
+            },
+            {
+              "name": "grau_parentesco"
+            },
+            {
+              "name": "especialidade"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        272,
+        1216
+      ],
+      "id": "3a5db961-c2fc-4218-be59-de8d7ae7cfa7",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "/**\n * ------- UTILIDADES -------\n */\n\n// Converte “29/04/2025 09:00”  ->  “2025-04-29T09:00:00”\nconst parseBrDate = (s) => {\n  if (!s) return null;\n  const [d, m, rest] = s.split('/');\n  const [y, time]    = rest.trim().split(' ');\n  const [hh, mm]     = time.split(':');\n  return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}T${hh.padStart(2,'0')}:${mm.padStart(2,'0')}:00`;\n};\n\n// Garante formato ISO e coloca “:00” se segundos estiverem ausentes\nconst cleanDateString = (dateStr) => {\n  if (!dateStr) return null;\n  dateStr = dateStr.replace(' ', 'T')        // troca espaço por T\n                   .replace(/Z$/, '')        // remove Z final\n                   .split('.')[0];           // remove milissegundos\n  if (dateStr.split(':').length === 2) dateStr += ':00'; // adiciona segundos\n  return dateStr;\n};\n\n// Soma +1 hora (rodâ 30 => 00)\nconst addOneHour = (dateStr) => {\n  const [datePart, timePart] = dateStr.split('T');\n  let [hh, mm, ss] = timePart.split(':').map(Number);\n\n  hh = (hh + 1) % 24;                         // 23+1 → 0\n  return `${datePart}T${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;\n};\n\n// Diferença (em horas) entre dois ISO strings (sem ms)\nconst getHourDifference = (startStr, finishStr) => {\n  const start = new Date(startStr);\n  const finish = new Date(finishStr);\n  return (finish - start) / (1000 * 60 * 60); // ms → h\n};\n\n/**\n * ------- PROCESSAMENTO -------\n */\n\nlet item = $input.item;\n\n// 1. Pega datas vindas do item (ajuste aqui se seus campos mudarem)\nlet dateStart  = item.json.data_inicio;   // “2025-04-29 09:00”  ou  “29/04/2025 09:00”\nlet dateFinish = item.json.data_final;  // idem\nlet dataAntiga = item.json.data_antiga;  // opcional\n\n// 2. Caso venham no formato BR (dd/mm/aaaa), converte primeiro\nif (dateStart?.includes('/') && dateStart?.includes(' '))  dateStart  = parseBrDate(dateStart);\nif (dateFinish?.includes('/') && dateFinish?.includes(' ')) dateFinish = parseBrDate(dateFinish);\n\n// 3. Padroniza e garante segundos\ndateStart  = cleanDateString(dateStart);\ndateFinish = cleanDateString(dateFinish);\ndataAntiga = cleanDateString(dataAntiga);\n\n// 4. Se tiver start & finish mas eles NÃO differem 1h → corrige finish\nif (dateStart && dateFinish) {\n  const diff = getHourDifference(dateStart, dateFinish);\n  if (diff !== 1) dateFinish = addOneHour(dateStart);\n}\n\n// 5. Escreve de volta no item\nitem.json.data_inicio  = dateStart;   // 2025-04-29T09:00:00\nitem.json.data_final = dateFinish;  // 2025-04-29T10:00:00\nitem.json.data_antiga = dataAntiga;  // se existir\n\nreturn item;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        1216
+      ],
+      "id": "34d3f2be-6640-4076-a339-4c62f522d775",
+      "name": "Calcula Datas"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "profissionais",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "especialidade",
+              "keyValue": "={{ $json.especialidade }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        784,
+        1216
+      ],
+      "id": "74c1b78b-e015-4e12-b12c-d4920de729f8",
+      "name": "Busca Profissional"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 2240,
+        "width": 3320,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        80
+      ],
+      "id": "35dd4b6a-7f0e-4d67-a5c2-0f6a4b82bdd7",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('When Executed by Another Workflow').item.json.funcao }}",
+                    "rightValue": "agendar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "daa72589-f09c-4a90-a3eb-9421611aef8b"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "agendar"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "7a57e8e8-5227-4cde-8d58-7b447cd55a17",
+                    "leftValue": "={{ $('When Executed by Another Workflow').item.json.funcao }}",
+                    "rightValue": "cancelar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "cancelamento"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d788021f-29ab-41f2-b355-2b18963d30f2",
+                    "leftValue": "={{ $('When Executed by Another Workflow').item.json.funcao }}",
+                    "rightValue": "reagendar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "reagendamento"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "97d610af-cbf9-4d30-a0b4-19e183d8354d",
+                    "leftValue": "={{ $('When Executed by Another Workflow').item.json.funcao }}",
+                    "rightValue": "buscar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "busca"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b3444b5e-6c97-4dd3-9881-9c667d307bc4",
+      "name": "Verifica Função",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1088,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $('Busca Profissional').item.json.uuid_calendar }}",
+          "mode": "id"
+        },
+        "timeMin": "={{ $('Calcula Datas').item.json.data_inicio }}",
+        "timeMax": "={{ $('Calcula Datas').item.json.data_final }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1488,
+        432
+      ],
+      "id": "5539cf8c-f125-43b8-b6a2-d675e5a65485",
+      "name": "Busca Disponbilidade"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6885002f-1ead-4690-99e9-6849a8edd730",
+              "leftValue": "={{ $json.available }}",
+              "rightValue": "false",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1712,
+        432
+      ],
+      "id": "ccbd5ffa-7de6-4020-9735-9a6c4172e3a9",
+      "name": "Se Estiver Disponível"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $('Busca Profissional').item.json.uuid_calendar }}",
+          "mode": "id"
+        },
+        "start": "={{ $('Calcula Datas').item.json.data_inicio }}",
+        "end": "={{ $('Calcula Datas').item.json.data_final }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $('When Executed by Another Workflow').item.json.email }}"
+          ],
+          "location": "New Hair Institute",
+          "summary": "={{ $('When Executed by Another Workflow').item.json.servico.charAt(0).toUpperCase() + $('When Executed by Another Workflow').item.json.servico.slice(1) }} para {{ $('When Executed by Another Workflow').item.json.nome_agendado }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1952,
+        256
+      ],
+      "id": "7033c707-9189-44f4-9e48-f3dd38c32bd3",
+      "name": "Cria o Evento"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('When Executed by Another Workflow').item.json.email }}",
+        "subject": "Agendamento confirmado com sucesso!",
+        "message": "=<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Evento Agendado - New Hair Institute</title>\n    <style>\n        body {\n            font-family: 'Arial', sans-serif;\n            line-height: 1.6;\n            color: #333;\n            margin: 0;\n            padding: 0;\n            background-color: #f9f9f9;\n        }\n        .container {\n            max-width: 600px;\n            margin: 0 auto;\n            background-color: #ffffff;\n            border-radius: 8px;\n            overflow: hidden;\n            box-shadow: 0 3px 10px rgba(0,0,0,0.1);\n        }\n        .header {\n            background-color: #6a4c93;\n            color: white;\n            padding: 20px;\n            text-align: center;\n        }\n        .logo {\n            max-width: 150px;\n            margin-bottom: 10px;\n        }\n        .content {\n            padding: 30px;\n        }\n        .event-details {\n            background-color: #f1f8ff;\n            padding: 20px;\n            border-radius: 6px;\n            margin: 20px 0;\n            border-left: 4px solid #6a4c93;\n        }\n        .footer {\n            background-color: #f0f0f0;\n            padding: 15px;\n            text-align: center;\n            font-size: 14px;\n            color: #666;\n        }\n        .button {\n            display: inline-block;\n            background-color: #ff8c42;\n            color: white;\n            padding: 12px 25px;\n            text-decoration: none;\n            border-radius: 5px;\n            font-weight: bold;\n            margin-top: 15px;\n        }\n        .button:hover {\n            background-color: #e57b36;\n        }\n        .social {\n            margin-top: 20px;\n        }\n        .social a {\n            margin: 0 10px;\n            color: #6a4c93;\n            text-decoration: none;\n        }\n        h1 {\n            color: #ffffff;\n            margin: 0;\n            font-size: 24px;\n        }\n        h2 {\n            color: #6a4c93;\n            margin-top: 0;\n        }\n        .paw-icon {\n            font-size: 20px;\n            color: #ff8c42;\n        }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <div class=\"header\">\n            <h1>💆🏻‍♀️ NEW HAIR INSTITUTE 💆🏻‍♀️</h1>\n            <p>O paraíso para sua beleza!</p>\n        </div>\n        \n        <div class=\"content\">\n            <h2>Sua solicitação foi agendada com sucesso!</h2>\n            \n            <p>Olá, <strong>{{ $('When Executed by Another Workflow').item.json.nome_cliente }}</strong>!</p>\n            \n            <p>Estamos felizes em confirmar que seu agendamento no New Hair Institute foi realizado com sucesso.</p>\n            \n            <div class=\"event-details\">\n                <h3><span class=\"paw-icon\"></span> Detalhes do Agendamento</h3>\n                <p><strong>Serviço:</strong>{{$('When Executed by Another Workflow').item.json.servico.charAt(0).toUpperCase() + $('When Executed by Another Workflow').item.json.servico.slice(1) }} </p>\n                <p><strong>Data: {{ new Date($('Calcula Datas').item.json.data_inicio).toLocaleDateString('pt-BR') }}</strong> </p>\n                <p><strong>Horário:</strong> {{ new Date($('Calcula Datas').item.json.data_inicio).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) }}</p>\n                <p><strong>Nome Agendado:</strong>{{ $('When Executed by Another Workflow').item.json.nome_agendado }}</p>\n            </div>\n            \n            <h3>Recomendações</h3>\n            <ul>\n                <li>Chegue com 10 minutos de antecedência</li>\n                <li>Informe-nos sobre quaisquer condições especiais ou alergias</li>\n                <li>Em caso de atraso, por favor, entre em contato conosco</li>\n            </ul>\n            \n            <p>Precisando reagendar ou cancelar? Sem problemas! Entre em contato conosco com pelo menos 24 horas de antecedência.</p>\n            \n            <p style=\"margin-top: 30px;\">Agradecemos por escolher o New Hair Institute para cuidar da sua beleza!</p>\n            \n            <p>Atenciosamente,<br>\n            Equipe New Hair Institute</p>\n        </div>\n        \n        <div class=\"footer\">\n            <p>New Hair Institute - Rua dos Cabelos, 123 - Cidade Florianópolis</p>\n            <p>Telefone: (00) 1234-5678 | Email: contato@newhairinstitute.com.br</p>\n            \n            <div class=\"social\">\n                <a href=\"#\">Instagram</a> | \n                <a href=\"#\">Facebook</a> | \n                <a href=\"#\">WhatsApp</a>\n            </div>\n            \n            <p style=\"margin-top: 15px; font-size: 12px;\">\n                Se você não solicitou este e-mail, por favor desconsidere.\n                <br>© 2025 New Hair Institute. Todos os direitos reservados.\n            </p>\n        </div>\n    </div>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2208,
+        256
+      ],
+      "id": "ab6d0f07-fe1d-452f-a2ca-bd7d4d2dfc50",
+      "name": "Envia E-mail Personalizado",
+      "webhookId": "9621260b-27f3-4b09-a279-01f73c69ee25"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "17S5DcNVQOLK4OJ5ItMVDT9LZs2kKZE1r6CIObqoukJ4",
+          "mode": "list",
+          "cachedResultName": "Salao de Beleza Agenda",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17S5DcNVQOLK4OJ5ItMVDT9LZs2kKZE1r6CIObqoukJ4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Serviços",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17S5DcNVQOLK4OJ5ItMVDT9LZs2kKZE1r6CIObqoukJ4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Data Agendada": "={{ $('Calcula Datas').item.json.data_inicio }}",
+            "Horário": "={{ $('Calcula Datas').item.json.data_final }}",
+            "Serviços": "={{ $('When Executed by Another Workflow').item.json.servico }}",
+            "Nome Cliente": "={{ $('When Executed by Another Workflow').item.json.nome_cliente }}",
+            "Telefone": "={{ $('When Executed by Another Workflow').item.json.remotejid }}",
+            "E-mail": "={{ $('When Executed by Another Workflow').item.json.email }}",
+            "Preço": "={{ $('When Executed by Another Workflow').item.json.preco_servico }}",
+            "Status": "CONFIRMADO",
+            "Nome Agendado": "={{ $('When Executed by Another Workflow').item.json.nome_agendado }}",
+            "Grau de Parentesco": "={{ $('When Executed by Another Workflow').item.json.grau_parentesco }}",
+            "Profissional": "={{ $('Busca Profissional').item.json.nome }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Data Agendada",
+              "displayName": "Data Agendada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Horário",
+              "displayName": "Horário",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Serviços",
+              "displayName": "Serviços",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nome Cliente",
+              "displayName": "Nome Cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Telefone",
+              "displayName": "Telefone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "E-mail",
+              "displayName": "E-mail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nome Agendado",
+              "displayName": "Nome Agendado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Grau de Parentesco",
+              "displayName": "Grau de Parentesco",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Preço",
+              "displayName": "Preço",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Profissional",
+              "displayName": "Profissional",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2448,
+        464
+      ],
+      "id": "41de0d06-a55c-4dd1-90e3-8a9d6af0e41f",
+      "name": "Atualiza Agenda"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c91ea9a3-9d02-47fb-93e3-7bdf0ad5e2f8",
+              "name": "response",
+              "value": "=Evento foi agendado com sucesso com o profissional {{ $('Busca Profissional').item.json.nome }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2688,
+        256
+      ],
+      "id": "3dbc7eb0-d143-45a3-842d-fceecdba624c",
+      "name": "Retorna para o Agente"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c91ea9a3-9d02-47fb-93e3-7bdf0ad5e2f8",
+              "name": "response",
+              "value": "Horário não disponível",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1968,
+        592
+      ],
+      "id": "c3ba01a4-447b-4934-be0a-d06d96b6fde7",
+      "name": "Retorna não Disponível"
+    },
+    {
+      "parameters": {
+        "content": "# Verifica Disponibilidade e Faz o Agendamento na agenda do profissional",
+        "height": 640,
+        "width": 1620,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        160
+      ],
+      "id": "7ffab1c6-1f0b-4569-bf34-1a3597a21453",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $('Busca Profissional').item.json.uuid_calendar }}",
+          "mode": "id"
+        },
+        "eventId": "={{ $json.id }}",
+        "options": {}
+      },
+      "id": "81596fd8-6875-498d-9362-b7ca915c3a03",
+      "name": "Exclui Evento",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.1,
+      "position": [
+        1824,
+        960
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $('Busca Profissional').item.json.uuid_calendar }}",
+          "mode": "id"
+        },
+        "timeMin": "={{ $('Calcula Datas').item.json.data_inicio }}",
+        "timeMax": "={{ $('Calcula Datas').item.json.data_final }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1520,
+        960
+      ],
+      "id": "97181ffd-7a89-4deb-9a9f-45f0b302a8f5",
+      "name": "Busca todos os Eventos",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('When Executed by Another Workflow').item.json.email }}",
+        "subject": "Cancelamento de Agendamento",
+        "message": "=<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Agendamento Cancelado - New Hair Institute</title>\n    <style>\n        body {\n            font-family: 'Arial', sans-serif;\n            line-height: 1.6;\n            color: #333;\n            margin: 0;\n            padding: 0;\n            background-color: #f9f9f9;\n        }\n        .container {\n            max-width: 600px;\n            margin: 0 auto;\n            background-color: #ffffff;\n            border-radius: 8px;\n            overflow: hidden;\n            box-shadow: 0 3px 10px rgba(0,0,0,0.1);\n        }\n        .header {\n            background-color: #6a4c93;\n            color: white;\n            padding: 20px;\n            text-align: center;\n        }\n        .logo {\n            max-width: 150px;\n            margin-bottom: 10px;\n        }\n        .content {\n            padding: 30px;\n        }\n        .cancellation-details {\n            background-color: #fff4f4;\n            padding: 20px;\n            border-radius: 6px;\n            margin: 20px 0;\n            border-left: 4px solid #6a4c93;\n        }\n        .footer {\n            background-color: #f0f0f0;\n            padding: 15px;\n            text-align: center;\n            font-size: 14px;\n            color: #666;\n        }\n        .button {\n            display: inline-block;\n            background-color: #ff8c42;\n            color: white;\n            padding: 12px 25px;\n            text-decoration: none;\n            border-radius: 5px;\n            font-weight: bold;\n            margin-top: 15px;\n        }\n        .button:hover {\n            background-color: #e57b36;\n        }\n        .social {\n            margin-top: 20px;\n        }\n        .social a {\n            margin: 0 10px;\n            color: #6a4c93;\n            text-decoration: none;\n        }\n        h1 {\n            color: #ffffff;\n            margin: 0;\n            font-size: 24px;\n        }\n        h2 {\n            color: #6a4c93;\n            margin-top: 0;\n        }\n        .paw-icon {\n            font-size: 20px;\n            color: #ff8c42;\n        }\n        .reschedule-box {\n            background-color: #e8f4ff;\n            padding: 15px;\n            border-radius: 6px;\n            margin-top: 25px;\n            text-align: center;\n        }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <div class=\"header\">\n            <h1>💆🏻‍♀️ NEW HAIR INSTITUTE 💆🏻‍♀️</h1>\n            <p>O paraíso para sua beleza!</p>\n        </div>\n        \n        <div class=\"content\">\n            <h2>Seu agendamento foi cancelado!</h2>\n            \n            <p>Olá, <strong>{{ $('When Executed by Another Workflow').item.json.nome_cliente }}</strong>!</p>\n            \n            <p>Informamos que o agendamento no New Hair Insitute foi <strong>cancelado</strong> conforme solicitado. Esperamos poder atender você em breve novamente!</p>\n            \n            <div class=\"cancellation-details\">\n                <h3><span class=\"paw-icon\">🐾</span> Detalhes do Agendamento Cancelado</h3>\n                <p><strong>Serviço:</strong> {{ $('When Executed by Another Workflow').item.json.servico.charAt(0).toUpperCase() + $('When Executed by Another Workflow').item.json.servico.slice(1) }}</p>\n                <p><strong>Data: {{ new Date($('Calcula Datas').item.json.data_inicio).toLocaleDateString('pt-BR') }}</strong> </p>\n                <p><strong>Horário:</strong> {{ new Date($('Calcula Datas').item.json.data_inicio).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) }}</p>\n                <p><strong>Nome Agendado:</strong>{{ $('When Executed by Another Workflow').item.json.nome_agendado }}</p>\n            </div>\n            \n            <div class=\"reschedule-box\">\n                <h3>Deseja fazer um novo agendamento?</h3>\n                <p>Entre em contato conosco pelos canais abaixo ou visite nossa loja.</p>\n                <p>Telefone: (00) 1234-5678</p>\n                <p>WhatsApp: (11) 4432-3234</p>\n            </div>\n            \n            <p style=\"margin-top: 30px;\">Agradecemos sua compreensão e esperamos recebê-los em breve!</p>\n            \n            <p>Atenciosamente,<br>\n            Equipe New Hair Institute</p>\n        </div>\n        \n        <div class=\"footer\">\n            <p>New Hair Institute - Rua dos Cabelos, 123 - Cidade \nFlorianópolis</p>\n            <p>Telefone: (00) 1234-5678 | Email: contato@newhairinstitute.com.br</p>\n\n            \n            <p style=\"margin-top: 15px; font-size: 12px;\">\n                Se você não solicitou este e-mail, por favor desconsidere.\n                <br>© 2025 New Hair Institute. Todos os direitos reservados.\n            </p>\n        </div>\n    </div>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2080,
+        960
+      ],
+      "id": "6dd59eeb-3c2b-4cf9-afe2-09695300e39e",
+      "name": "Envia Email de Cancelamento",
+      "webhookId": "0a6646f0-1169-46a0-9156-119f0067a977"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "17S5DcNVQOLK4OJ5ItMVDT9LZs2kKZE1r6CIObqoukJ4",
+          "mode": "list",
+          "cachedResultName": "Salao de Beleza Agenda",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17S5DcNVQOLK4OJ5ItMVDT9LZs2kKZE1r6CIObqoukJ4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Serviços",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dahKZhY756r5oGHcs0USm3YYFqWib3-ueBL4W3B4zXA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "E-mail": "={{ $('When Executed by Another Workflow').item.json.email }}",
+            "Status": "CANCELADO"
+          },
+          "matchingColumns": [
+            "E-mail"
+          ],
+          "schema": [
+            {
+              "id": "Data Agendada",
+              "displayName": "Data Agendada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Horário",
+              "displayName": "Horário",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Serviços",
+              "displayName": "Serviços",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Nome Cliente",
+              "displayName": "Nome Cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Telefone",
+              "displayName": "Telefone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "E-mail",
+              "displayName": "E-mail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nome Agendado",
+              "displayName": "Nome Agendado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Grau de Parentesco",
+              "displayName": "Grau de Parentesco",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Preço",
+              "displayName": "Preço",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Profissional",
+              "displayName": "Profissional",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2384,
+        848
+      ],
+      "id": "ce48bffd-0999-44c6-941c-93b715fbba21",
+      "name": "Atualiza Agenda como Cancelado"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7f842ffa-cd8f-40ab-a0a7-40dc173357a7",
+              "name": "response",
+              "value": "Informe o usuário que o agendamento foi cancelado e que estará sempre à disposição para um novo agendamento.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "22da5142-9186-4b06-874b-f2c1c052fcc4",
+      "name": "Retorna para o Agente o Cancelamento",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2704,
+        960
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Cancela conforme o evento na agenda",
+        "height": 400,
+        "width": 1620,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        816
+      ],
+      "id": "d5bb6363-4da2-433d-ad41-92a3c6ca459b",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "# Reagendamento conforme o evento na agenda",
+        "height": 460,
+        "width": 1620,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        1264
+      ],
+      "id": "de938912-0fdb-4f0d-8653-457b0850a5f7",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $('Busca Profissional').item.json.uuid_calendar }}",
+          "mode": "id"
+        },
+        "timeMin": "={{ $('Calcula Datas').item.json.data_inicio }}",
+        "timeMax": "={{ $('Calcula Datas').item.json.data_final }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1488,
+        1424
+      ],
+      "id": "f2d7f983-c84b-4bdd-9cb4-ee5514c22f4f",
+      "name": "Verifica Disponbilidade"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6885002f-1ead-4690-99e9-6849a8edd730",
+              "leftValue": "={{ $json.available }}",
+              "rightValue": "false",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1680,
+        1424
+      ],
+      "id": "c83aac84-39ae-4581-8676-abc7cb628653",
+      "name": "Se estiver disponível"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c91ea9a3-9d02-47fb-93e3-7bdf0ad5e2f8",
+              "name": "response",
+              "value": "Horário não disponível",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1904,
+        1536
+      ],
+      "id": "bfb4e373-2d9e-4f4e-a185-db95748fe165",
+      "name": "Retorna não disponível"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $('Busca Profissional').item.json.uuid_calendar }}",
+          "mode": "id"
+        },
+        "timeMin": "={{ $('Calcula Datas').item.json.data_antiga }}",
+        "timeMax": "={{ \n  (() => {\n    const original = new Date($('Calcula Datas').item.json.data_antiga);\n    const novaData = new Date(original.getTime() + 60 * 60 * 1000);\n    const pad = (n) => n.toString().padStart(2, '0');\n    return `${novaData.getFullYear()}-${pad(novaData.getMonth() + 1)}-${pad(novaData.getDate())}T${pad(novaData.getHours())}:${pad(novaData.getMinutes())}:${pad(novaData.getSeconds())}`;\n  })()\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1904,
+        1344
+      ],
+      "id": "d1fda915-c4c6-4488-a4c0-ab82c7f2c0d5",
+      "name": "Busca Evento Antigo",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $('Busca Profissional').item.json.uuid_calendar }}",
+          "mode": "id"
+        },
+        "eventId": "={{ $json.id }}",
+        "updateFields": {
+          "end": "={{ $('Calcula Datas').item.json.data_final }}",
+          "start": "={{ $('Calcula Datas').item.json.data_inicio }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        2112,
+        1344
+      ],
+      "id": "3533fdb8-36f0-4c83-9c5b-1d93fab08cc7",
+      "name": "Atualiza Evento"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('When Executed by Another Workflow').item.json.email }}",
+        "subject": "Reagendamento confirmado",
+        "message": "=<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Reagendamento Confirmado - New Hair Institute</title>\n    <style>\n        body {\n            font-family: 'Arial', sans-serif;\n            line-height: 1.6;\n            color: #333;\n            margin: 0;\n            padding: 0;\n            background-color: #f9f9f9;\n        }\n        .container {\n            max-width: 600px;\n            margin: 0 auto;\n            background-color: #ffffff;\n            border-radius: 8px;\n            overflow: hidden;\n            box-shadow: 0 3px 10px rgba(0,0,0,0.1);\n        }\n        .header {\n            background-color: #6a4c93;\n            color: white;\n            padding: 20px;\n            text-align: center;\n        }\n        .logo {\n            max-width: 150px;\n            margin-bottom: 10px;\n        }\n        .content {\n            padding: 30px;\n        }\n        .previous-details {\n            background-color: #f8f2ff;\n            padding: 15px;\n            border-radius: 6px;\n            margin: 20px 0;\n            border-left: 4px solid #c9abf7;\n            position: relative;\n        }\n        .reschedule-arrow {\n            text-align: center;\n            margin: 15px 0;\n            font-size: 24px;\n            color: #6a4c93;\n        }\n        .new-details {\n            background-color: #e8fff2;\n            padding: 15px;\n            border-radius: 6px;\n            margin: 20px 0;\n            border-left: 4px solid #6a4c93;\n        }\n        .footer {\n            background-color: #f0f0f0;\n            padding: 15px;\n            text-align: center;\n            font-size: 14px;\n            color: #666;\n        }\n        .social {\n            margin-top: 20px;\n        }\n        .social a {\n            margin: 0 10px;\n            color: #6a4c93;\n            text-decoration: none;\n        }\n        h1 {\n            color: #ffffff;\n            margin: 0;\n            font-size: 24px;\n        }\n        h2 {\n            color: #6a4c93;\n            margin-top: 0;\n        }\n        .paw-icon {\n            font-size: 20px;\n            color: #ff8c42;\n        }\n        .recommendations {\n            background-color: #f5f5f5;\n            padding: 15px;\n            border-radius: 6px;\n            margin-top: 25px;\n        }\n        .cancel-notice {\n            font-size: 14px;\n            color: #666;\n            font-style: italic;\n            margin-top: 20px;\n        }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <div class=\"header\">\n            <h1>💆🏻‍♀️ NEW HAIR INSTITUTE 💆🏻‍♀️</h1>\n            <p>O paraíso para sua beleza!</p>\n        </div>\n        \n        <div class=\"content\">\n            <h2>Seu agendamento foi alterado com sucesso!</h2>\n            \n            <p>Olá, <strong>{{ $('When Executed by Another Workflow').item.json.nome_cliente }}</strong>!</p>\n            \n            <p>Confirmamos que seu agendamento no New Hair Insitute foi <strong>reagendado</strong> conforme solicitado. Veja abaixo os detalhes da alteração:</p>\n            \n            <div class=\"previous-details\">\n                <h3><span class=\"paw-icon\">🐾</span> Agendamento Anterior</h3>\n                <p><strong>Serviço:</strong> {{ $('When Executed by Another Workflow').item.json.servico.charAt(0).toUpperCase() + $('When Executed by Another Workflow').item.json.servico.slice(1) }}</p>\n                <p><strong>Data: {{ new Date($('Calcula Datas').item.json.date_antiga).toLocaleDateString('pt-BR') }}</strong> </p>\n                <p><strong>Horário:</strong> {{ new Date($('Calcula Datas').item.json.date_antiga).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) }}</p>\n                <p><strong>Nome Agendado:</strong>{{ $('When Executed by Another Workflow').item.json.nome_agendado }}</p>\n            </div>\n            \n            <div class=\"reschedule-arrow\">\n                ↓ ↓ ↓\n            </div>\n            \n            <div class=\"new-details\">\n                <h3><span class=\"paw-icon\">💆🏻‍♀️</span> Novo Agendamento</h3>\n                <p><strong>Serviço:</strong> {{ $('When Executed by Another Workflow').item.json.servico.charAt(0).toUpperCase() + $('When Executed by Another Workflow').item.json.servico.slice(1) }}</p>\n                <p><strong>Data: {{ new Date($('Calcula Datas').item.json.data_inicio).toLocaleDateString('pt-BR') }}</strong> </p>\n                <p><strong>Horário:</strong> {{ new Date($('Calcula Datas').item.json.data_inicio).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) }}</p>\n                <p><strong>Nome Agendado:</strong>{{ $('When Executed by Another Workflow').item.json.nome_agendado }}</p>\n            </div>\n            \n            <div class=\"recommendations\">\n                <h3>Recomendações</h3>\n                <ul>\n                    <li>Chegue com 10 minutos de antecedência</li>\n                    <li>Informe-nos sobre quaisquer condições especiais ou alergias</li>\n                    <li>Em caso de atraso, por favor, entre em contato conosco</li>\n                </ul>\n            </div>\n            \n            <p class=\"cancel-notice\">Caso precise alterar novamente ou cancelar seu agendamento, entre em contato conosco com pelo menos 24 horas de antecedência.</p>\n            \n            <p style=\"margin-top: 30px;\">Agradecemos por escolher o New Hair Institute para cuidar da sua beleza!</p>\n            \n            <p>Atenciosamente,<br>\n            Equipe New Hair Institute</p>\n        </div>\n        \n        <div class=\"footer\">\n            <p>New Hair Institute - Rua dos Cabelos, 123 - Cidade Florianópolis</p>\n            <p>Telefone: (00) 1234-5678 | Email: contato@newhairinstitute.com.br</p>\n\n            <div class=\"social\">\n                <a href=\"#\">Instagram</a> | \n                <a href=\"#\">Facebook</a> | \n                <a href=\"#\">WhatsApp</a>\n            </div>\n            \n            <p style=\"margin-top: 15px; font-size: 12px;\">\n                Se você não solicitou este e-mail, por favor desconsidere.\n                <br>© 2025 New Hair Institute. Todos os direitos reservados.\n            </p>\n        </div>\n    </div>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2336,
+        1344
+      ],
+      "id": "a3aab0f7-ecef-4152-ad37-dcdcb8745d05",
+      "name": "Enviar Email com Atualização",
+      "webhookId": "59655fea-5a41-4180-b2df-0f63954c97b9"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "17S5DcNVQOLK4OJ5ItMVDT9LZs2kKZE1r6CIObqoukJ4",
+          "mode": "list",
+          "cachedResultName": "Salao de Beleza Agenda",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17S5DcNVQOLK4OJ5ItMVDT9LZs2kKZE1r6CIObqoukJ4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Serviços",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dahKZhY756r5oGHcs0USm3YYFqWib3-ueBL4W3B4zXA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "E-mail": "={{ $('When Executed by Another Workflow').item.json.email }}",
+            "Status": "REAGENDADO CONFIRMADO",
+            "Data Agendada": "={{ $('Calcula Datas').item.json.data_inicio }}",
+            "Horário": "={{ $('Calcula Datas').item.json.data_final }}"
+          },
+          "matchingColumns": [
+            "E-mail"
+          ],
+          "schema": [
+            {
+              "id": "Data Agendada",
+              "displayName": "Data Agendada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Horário",
+              "displayName": "Horário",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Serviços",
+              "displayName": "Serviços",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Nome Cliente",
+              "displayName": "Nome Cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Telefone",
+              "displayName": "Telefone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "E-mail",
+              "displayName": "E-mail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nome Agendado",
+              "displayName": "Nome Agendado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Grau de Parentesco",
+              "displayName": "Grau de Parentesco",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Preço",
+              "displayName": "Preço",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Profissional",
+              "displayName": "Profissional",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2592,
+        1344
+      ],
+      "id": "eabfebb6-4c18-41ee-bc71-66d9689aaac5",
+      "name": "Atualiza Status"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "21ca3e50-a28c-421b-8b98-4e9dcbb8f019",
+              "name": "response",
+              "value": "Reagendado com Sucesso",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2832,
+        1344
+      ],
+      "id": "8800a299-10f6-43f8-8b20-0407d5f218f8",
+      "name": "Retorna para o Agente1"
+    },
+    {
+      "parameters": {
+        "content": "# Busca horários disponíveis",
+        "height": 500,
+        "width": 1620,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        1760
+      ],
+      "id": "a8bfbafe-a8c0-44eb-ba23-98f126dc094b",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6885002f-1ead-4690-99e9-6849a8edd730",
+              "leftValue": "={{ $json.available }}",
+              "rightValue": "false",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1728,
+        1936
+      ],
+      "id": "33e8319c-dfe7-41fa-ae30-d7694f8099c1",
+      "name": "Valida se está disponível"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "04c6ca35-7572-4699-bcb7-bbf2f2a6e6a4",
+              "name": "response",
+              "value": "horário disponível",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "eeda0971-c93b-47ba-bdfc-78780b9de7bc",
+      "name": "Retorna disponível para o agente",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1952,
+        1856
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $('Busca Profissional').item.json.uuid_calendar }}",
+          "mode": "id"
+        },
+        "limit": 10,
+        "timeMin": "={{ DateTime.fromISO($('Calcula Datas').item.json.data_inicio).toFormat(\"yyyy-MM-dd\") + \"T08:00:00\" }}",
+        "timeMax": "={{ DateTime.fromISO($('Calcula Datas').item.json.data_final).toFormat(\"yyyy-MM-dd\") + \"T18:00:00\" }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1952,
+        2080
+      ],
+      "id": "ae0e87ab-ae24-491a-8cac-eda0db2f20c6",
+      "name": "Busca opções disponíveis"
+    },
+    {
+      "parameters": {
+        "jsCode": "function formatHour(date) {\n  const pad = n => n.toString().padStart(2, '0');\n  return `${pad(date.getHours())}:${pad(date.getMinutes())}`;\n}\n\nfunction formatInterval(start, end) {\n  return `${formatHour(start)} às ${formatHour(end)}`;\n}\n\nconst firstEvent = new Date(items[0].json.start.dateTime);\nconst year = firstEvent.getFullYear();\nconst month = firstEvent.getMonth();\nconst day = firstEvent.getDate();\n\nconst workStart = new Date(year, month, day, 8, 0, 0);\nconst workEnd = new Date(year, month, day, 18, 0, 0);\n\nconst busyTimes = items.map(item => ({\n  start: new Date(item.json.start.dateTime),\n  end: new Date(item.json.end.dateTime)\n})).sort((a, b) => a.start - b.start);\n\nlet freeSlots = [];\nlet current = new Date(workStart);\n\nfor (let i = 0; i < busyTimes.length; i++) {\n  const busy = busyTimes[i];\n\n  if (current < busy.start) {\n    const slotStart = new Date(current);\n    const slotEnd = new Date(busy.start);\n\n    if (slotStart < workEnd && slotEnd > workStart) {\n      freeSlots.push({\n        start: slotStart,\n        end: slotEnd < workEnd ? slotEnd : new Date(workEnd)\n      });\n    }\n  }\n\n  if (busy.end > current) {\n    current = new Date(busy.end);\n  }\n}\n\nif (current < workEnd) {\n  freeSlots.push({\n    start: new Date(current),\n    end: new Date(workEnd)\n  });\n}\n\n// Formata os horários disponíveis\nconst formattedSlots = freeSlots.map(slot => `🕒 ${formatInterval(slot.start, slot.end)}`);\nconst message = formattedSlots.length\n  ? `✅ *Horários disponíveis para agendamento:*\\n\\n${formattedSlots.join('\\n')}`\n  : `⚠️ Infelizmente, não há horários disponíveis para agendamento hoje.`;\n\n// Retorna só uma mensagem formatada\nreturn [{ json: { message } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2208,
+        2080
+      ],
+      "id": "7ddf0f8f-e8ac-4a76-91c9-4c4c1c8c4c4d",
+      "name": "Formata horários disponíveis"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "04c6ca35-7572-4699-bcb7-bbf2f2a6e6a4",
+              "name": "response",
+              "value": "=O horário solicitado não esta disponível, porém \n\n{{ $json.message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1c7e7de3-19d6-4dd0-a4a8-b4f30c735999",
+      "name": "Retorna horários disponíveis",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2464,
+        2080
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "={{ $('Busca Profissional').item.json.uuid_calendar }}",
+          "mode": "id"
+        },
+        "timeMin": "={{ $('Calcula Datas').item.json.data_inicio }}",
+        "timeMax": "={{ $('Calcula Datas').item.json.data_final }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1504,
+        1936
+      ],
+      "id": "10cac86c-76c5-46d4-920f-6b607c041c3d",
+      "name": "Busca disponibilidade"
+    },
+    {
+      "parameters": {
+        "tableId": "agenda",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "data_inicio",
+              "fieldValue": "={{ $('Calcula Datas').item.json.data_inicio }}"
+            },
+            {
+              "fieldId": "data_fim",
+              "fieldValue": "={{ $('Calcula Datas').item.json.data_final }}"
+            },
+            {
+              "fieldId": "servico",
+              "fieldValue": "={{ $('When Executed by Another Workflow').item.json.servico }}"
+            },
+            {
+              "fieldId": "nome_cliente",
+              "fieldValue": "={{ $('When Executed by Another Workflow').item.json.nome_cliente }}"
+            },
+            {
+              "fieldId": "email_cliente",
+              "fieldValue": "={{ $('When Executed by Another Workflow').item.json.email }}"
+            },
+            {
+              "fieldId": "telefone_cliente",
+              "fieldValue": "={{ $('When Executed by Another Workflow').item.json.remotejid }}"
+            },
+            {
+              "fieldId": "nome_agendado",
+              "fieldValue": "={{ $('When Executed by Another Workflow').item.json.nome_agendado }}"
+            },
+            {
+              "fieldId": "grau_parentesco",
+              "fieldValue": "={{ $('When Executed by Another Workflow').item.json.grau_parentesco }}"
+            },
+            {
+              "fieldId": "preco",
+              "fieldValue": "={{ $('When Executed by Another Workflow').item.json.preco_servico }}"
+            },
+            {
+              "fieldId": "profissional",
+              "fieldValue": "={{ $('Busca Profissional').item.json.nome }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "CONFIRMADO"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2448,
+        624
+      ],
+      "id": "9cac6ee5-973e-49d7-9845-a0b7bad9f0d7",
+      "name": "Cria linha na agenda"
+    },
+    {
+      "parameters": {
+        "content": "## Escolha sua agenda\nVocê pode optar por deixar em um excel ou no supabase - Mantive o Excel pois fica mais fácil para o cliente final",
+        "height": 528,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2384,
+        256
+      ],
+      "id": "804198d5-04d0-48b5-a743-85614af8ff10",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "agenda",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email_cliente",
+              "condition": "eq",
+              "keyValue": "={{ $('When Executed by Another Workflow').item.json.email }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "CANCELADO"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2384,
+        1056
+      ],
+      "id": "29efed3c-2e17-447e-8f96-71f568325674",
+      "name": "Atualiza como cancelado"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "agenda",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email_cliente",
+              "condition": "eq",
+              "keyValue": "={{ $('When Executed by Another Workflow').item.json.email }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "REAGENDADO CONFIRMADO"
+            },
+            {
+              "fieldId": "data_inicio",
+              "fieldValue": "={{ $('Calcula Datas').item.json.data_inicio }}"
+            },
+            {
+              "fieldId": "data_fim",
+              "fieldValue": "={{ $('Calcula Datas').item.json.data_final }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2592,
+        1536
+      ],
+      "id": "9953a5d4-c145-4933-8e71-ded84b7b4187",
+      "name": "Atualiza como REAGENDADO"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Calcula Datas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcula Datas": {
+      "main": [
+        [
+          {
+            "node": "Busca Profissional",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Busca Profissional": {
+      "main": [
+        [
+          {
+            "node": "Verifica Função",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verifica Função": {
+      "main": [
+        [
+          {
+            "node": "Busca Disponbilidade",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Busca todos os Eventos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Verifica Disponbilidade",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Busca disponibilidade",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Busca Disponbilidade": {
+      "main": [
+        [
+          {
+            "node": "Se Estiver Disponível",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Se Estiver Disponível": {
+      "main": [
+        [
+          {
+            "node": "Cria o Evento",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Retorna não Disponível",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cria o Evento": {
+      "main": [
+        [
+          {
+            "node": "Envia E-mail Personalizado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Envia E-mail Personalizado": {
+      "main": [
+        [
+          {
+            "node": "Atualiza Agenda",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Cria linha na agenda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualiza Agenda": {
+      "main": [
+        [
+          {
+            "node": "Retorna para o Agente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Exclui Evento": {
+      "main": [
+        [
+          {
+            "node": "Envia Email de Cancelamento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Busca todos os Eventos": {
+      "main": [
+        [
+          {
+            "node": "Exclui Evento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Envia Email de Cancelamento": {
+      "main": [
+        [
+          {
+            "node": "Atualiza Agenda como Cancelado",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Atualiza como cancelado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualiza Agenda como Cancelado": {
+      "main": [
+        [
+          {
+            "node": "Retorna para o Agente o Cancelamento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verifica Disponbilidade": {
+      "main": [
+        [
+          {
+            "node": "Se estiver disponível",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Se estiver disponível": {
+      "main": [
+        [
+          {
+            "node": "Busca Evento Antigo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Retorna não disponível",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Busca Evento Antigo": {
+      "main": [
+        [
+          {
+            "node": "Atualiza Evento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualiza Evento": {
+      "main": [
+        [
+          {
+            "node": "Enviar Email com Atualização",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Email com Atualização": {
+      "main": [
+        [
+          {
+            "node": "Atualiza Status",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Atualiza como REAGENDADO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualiza Status": {
+      "main": [
+        [
+          {
+            "node": "Retorna para o Agente1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valida se está disponível": {
+      "main": [
+        [
+          {
+            "node": "Retorna disponível para o agente",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Busca opções disponíveis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Busca opções disponíveis": {
+      "main": [
+        [
+          {
+            "node": "Formata horários disponíveis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formata horários disponíveis": {
+      "main": [
+        [
+          {
+            "node": "Retorna horários disponíveis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Busca disponibilidade": {
+      "main": [
+        [
+          {
+            "node": "Valida se está disponível",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cria linha na agenda": {
+      "main": [
+        [
+          {
+            "node": "Retorna para o Agente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualiza como cancelado": {
+      "main": [
+        [
+          {
+            "node": "Retorna para o Agente o Cancelamento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualiza como REAGENDADO": {
+      "main": [
+        [
+          {
+            "node": "Retorna para o Agente1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "funcao": "buscar",
+          "data_inicio": "2025-06-23T08:00:00",
+          "nome_agendado": "José da Silva",
+          "data_final": "2025-06-23T09:00:00",
+          "email": "r.ric@gmail.com",
+          "servico": "corte masculino",
+          "nome_cliente": "Ricardo Neves Braga",
+          "data_antiga": "",
+          "preco_servico": "",
+          "grau_parentesco": "filho",
+          "remotejid": "5511998234567",
+          "especialidade": "masculino"
+        }
+      }
+    ]
+  },
+  "versionId": "1099fb24-9a3d-44df-8096-76d8e984601c",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-03-04T03:48:06.365Z",
+      "createdAt": "2026-03-04T03:48:06.365Z",
+      "role": "workflow:owner",
+      "workflowId": "YDcFLqVOjR3ySa4Y",
+      "projectId": "v0LdrnPHSqH3q9P1"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
