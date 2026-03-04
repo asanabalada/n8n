@@ -1,0 +1,326 @@
+{
+  "updatedAt": "2026-03-04T03:45:28.843Z",
+  "createdAt": "2026-03-04T03:45:21.387Z",
+  "id": "RdzFfzqD6R7nNBBp",
+  "name": "Aviso de Agendamento Próximo para o cliente",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "",
+        "height": 620,
+        "width": 1720,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        448,
+        80
+      ],
+      "typeVersion": 1,
+      "id": "3e1e1b9c-6a02-4172-b45e-453b1e36f1f8",
+      "name": "Sticky Note46"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            },
+            {
+              "triggerAtHour": 18
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        496,
+        224
+      ],
+      "id": "246056cd-67d0-41ac-953a-e0f6ea348bc0",
+      "name": "Roda Aviso"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "SUA-INSTANCIA",
+        "remoteJid": "={{ $('Busca Aviso de agendamento próximo').item.json.telefone_cliente }}",
+        "messageText": "={{ $json.text }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        240
+      ],
+      "id": "4a359216-08c4-4efa-92df-d0816d054e37",
+      "name": "Envia Aviso"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1056,
+        224
+      ],
+      "id": "9e8af01c-4fd0-463f-8dd8-fe1cae221fe8",
+      "name": "Itera sobre os agendados"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "17S5DcNVQOLK4OJ5ItMVDT9LZs2kKZE1r6CIObqoukJ4",
+          "mode": "list",
+          "cachedResultName": "Salao de Beleza Agenda",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17S5DcNVQOLK4OJ5ItMVDT9LZs2kKZE1r6CIObqoukJ4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Serviços",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17S5DcNVQOLK4OJ5ItMVDT9LZs2kKZE1r6CIObqoukJ4/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Data Agendada",
+              "lookupValue": "={{ $now.plus({ days: 1 }).toFormat('dd/MM/yyyy') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        784,
+        224
+      ],
+      "id": "3e2ef1f0-a562-4b76-b577-71f8a3a33c0f",
+      "name": "Lista de Agendamento",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "agenda",
+        "limit": 100,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "condition": "ilike",
+              "keyValue": "CONFIRMADO"
+            },
+            {
+              "keyName": "data_inicio",
+              "condition": "eq",
+              "keyValue": "={{ $now.plus({ days: 1 }).toFormat('yyyy-MM-dd')}}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        784,
+        448
+      ],
+      "id": "88300c2c-2873-4176-9ae1-a359c9ae3e9c",
+      "name": "Busca Aviso de agendamento próximo"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Você é um agente que cria avisos amigáveis de agendamento de serviço.\nBaseado no json que lhe enviei crie um aviso para whatsapp para serviços de salão de beleza para o cliente.\n\nExemplo de como usar:\n\nOlá fulano de tal, estamos passando aqui para lembrar que seu agendamento com xxx está próximo ..."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        1360,
+        240
+      ],
+      "id": "c5c5781d-1c94-4dae-bab4-49264a1aead7",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1296,
+        448
+      ],
+      "id": "fd75b748-2b52-4574-b9b5-43ac9552b070",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1952,
+        240
+      ],
+      "id": "ce0d830d-4b31-46fa-a1ed-13bf0e0e942b",
+      "name": "Espera 5 segundos",
+      "webhookId": "3224d9e9-c531-4ef7-8591-452b2e694da8"
+    },
+    {
+      "parameters": {
+        "content": "### Atualize sua instância",
+        "height": 304,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1648,
+        160
+      ],
+      "id": "2de4543b-b4ff-404d-9858-84d3b41da103",
+      "name": "Sticky Note1"
+    }
+  ],
+  "connections": {
+    "Roda Aviso": {
+      "main": [
+        [
+          {
+            "node": "Lista de Agendamento",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Busca Aviso de agendamento próximo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Envia Aviso": {
+      "main": [
+        [
+          {
+            "node": "Espera 5 segundos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Itera sobre os agendados": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lista de Agendamento": {
+      "main": [
+        [
+          {
+            "node": "Itera sobre os agendados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Busca Aviso de agendamento próximo": {
+      "main": [
+        [
+          {
+            "node": "Itera sobre os agendados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Envia Aviso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Espera 5 segundos": {
+      "main": [
+        [
+          {
+            "node": "Itera sobre os agendados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "fe68e585-1025-4cf6-8ab4-aac3c528be0d",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-03-04T03:45:21.387Z",
+      "createdAt": "2026-03-04T03:45:21.387Z",
+      "role": "workflow:owner",
+      "workflowId": "RdzFfzqD6R7nNBBp",
+      "projectId": "v0LdrnPHSqH3q9P1"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
