@@ -1,10 +1,10 @@
 {
-  "updatedAt": "2026-03-03T13:50:14.010Z",
+  "updatedAt": "2026-03-04T03:49:47.860Z",
   "createdAt": "2026-03-03T13:50:14.010Z",
   "id": "oDxirCuJtehA31ca",
   "name": "Agente SDR + RAG + Agendamento + Follow Up",
   "active": false,
-  "isArchived": false,
+  "isArchived": true,
   "nodes": [
     {
       "parameters": {
@@ -3506,7 +3506,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "fcb61488-e0ad-4ca1-83d4-6dd8423d5752",
+  "versionId": "46125f16-8735-4fb8-8453-aeef021fb477",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
