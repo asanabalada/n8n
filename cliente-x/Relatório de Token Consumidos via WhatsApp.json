@@ -1,0 +1,252 @@
+{
+  "updatedAt": "2026-03-04T03:48:27.761Z",
+  "createdAt": "2026-03-04T03:48:27.761Z",
+  "id": "2Cpc4DvbsQh7VEAD",
+  "name": "Relatório de Token Consumidos via WhatsApp",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "gl": "br",
+          "google_domain": "google.com",
+          "hl": "pt"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        1392,
+        512
+      ],
+      "id": "1e5f97f1-2fdc-4170-be71-64f1439b623e",
+      "name": "consulta_dolar"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 620,
+        "width": 1700,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        304,
+        80
+      ],
+      "typeVersion": 1,
+      "id": "1e328864-8738-4b79-b8ee-b4919752f7e6",
+      "name": "Sticky Note69"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "tokens",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "CostUSD",
+              "condition": "neq",
+              "keyValue": "0"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        656,
+        240
+      ],
+      "id": "8dfc0d48-86a7-40c1-a8ae-7b94fbc25ea2",
+      "name": "Busca Registros de Tokens"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Run Once for All Items\nconst items = $input.all();\n\n// Extrai e converte cada CostUSD\nconst costs = items.map(item => parseFloat(item.json.CostUSD) || 0);\n\n// Soma tudo\nconst total = costs.reduce((sum, c) => sum + c, 0);\n\n// Retorna um único item com o array de custos e o total\nreturn [\n  {\n    json: {\n      costs,                                 // [0.002776, 0.003028, …]\n      totalCostUSD: Number(total.toFixed(6)) // arredonda em 2 casas\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        240
+      ],
+      "id": "05c77b24-465e-4bbe-ad6b-efdefc9c6f89",
+      "name": "Junta tudo em um array"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "SUA-INSTANCIA",
+        "remoteJid": "SEU-NUMERO",
+        "messageText": "=Você gastou um total de R$ {{ $json.output }} com a OpenAI no fluxo de Salao de Beleza",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1584,
+        304
+      ],
+      "id": "abefebde-9e7a-4379-a26c-aa320eac4fff",
+      "name": "Envia Custos"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Chame a tool consulta_dolar com a função para consultar o dolar do dia para multiplicar por {{ $json.totalCostUSD  }}\n\nRetorne apenas o valor final em real apenas com duas casas decimais, sem nenhum comentario nem instrução",
+        "options": {
+          "systemMessage": "=Você é um professor de matemática e precisa sempre calcular o valor do dólar atual.\n\nvocê vai receber um valor em dólar  {{ $json.totalCostUSD }} e pra transformar em real, precisa sempre acionar a sua tool consulta_dolar para calcular o valor em real. \n\nSempre retorne apenas o valor em Real, e faça sempre um comentario "
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        1152,
+        240
+      ],
+      "id": "bbe6c805-4e33-41c9-ac1a-d99ebec1a653",
+      "name": "AI Agent Calculador"
+    },
+    {
+      "parameters": {
+        "content": "## Ajuste\nColoque o número do WhatsApp que vc deseja receber o relatório",
+        "height": 300,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1520,
+        160
+      ],
+      "id": "691aaf30-7348-40f8-95db-2e90b02ce7a6",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        240
+      ],
+      "id": "98576168-0c46-4737-99e0-811bb8d2757e",
+      "name": "Enviar todo dia as 00 da noite"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1088,
+        512
+      ],
+      "id": "fe3e9edc-4dc1-490d-aa97-6b5183081b66",
+      "name": "OpenAI 4o-mini"
+    }
+  ],
+  "connections": {
+    "consulta_dolar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent Calculador",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Busca Registros de Tokens": {
+      "main": [
+        [
+          {
+            "node": "Junta tudo em um array",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Junta tudo em um array": {
+      "main": [
+        [
+          {
+            "node": "AI Agent Calculador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent Calculador": {
+      "main": [
+        [
+          {
+            "node": "Envia Custos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar todo dia as 00 da noite": {
+      "main": [
+        [
+          {
+            "node": "Busca Registros de Tokens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI 4o-mini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent Calculador",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "1c00d621-dce5-44e7-b632-19961bacb60b",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-03-04T03:48:27.761Z",
+      "createdAt": "2026-03-04T03:48:27.761Z",
+      "role": "workflow:owner",
+      "workflowId": "2Cpc4DvbsQh7VEAD",
+      "projectId": "v0LdrnPHSqH3q9P1"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
