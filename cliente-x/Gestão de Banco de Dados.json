@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-04T03:46:32.645Z",
+  "updatedAt": "2026-03-04T17:57:21.890Z",
   "createdAt": "2026-03-04T03:46:32.645Z",
   "id": "XK9M1D2ByWlDCkBZ",
   "name": "Gestão de Banco de Dados",
@@ -19,7 +19,13 @@
         320
       ],
       "id": "2f44a49a-fc77-4640-b6d2-e6bb8c0af23f",
-      "name": "Cria Tabela Dados Cliente"
+      "name": "Cria Tabela Dados Cliente",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
@@ -34,7 +40,13 @@
         1168
       ],
       "id": "68edbdd9-1f98-4c28-8b48-a29528d0a7fd",
-      "name": "Cria Tabela Documentos"
+      "name": "Cria Tabela Documentos",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
@@ -49,7 +61,13 @@
         1408
       ],
       "id": "e3bdfa52-92cc-4465-9548-f2b6a421b0ff",
-      "name": "Deleta Conteúdo Documentos"
+      "name": "Deleta Conteúdo Documentos",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
@@ -64,7 +82,13 @@
         1168
       ],
       "id": "bee05ab2-6b44-42b4-800a-7e43e052532e",
-      "name": "Cria função Busca em Vetor"
+      "name": "Cria função Busca em Vetor",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
@@ -79,7 +103,13 @@
         1168
       ],
       "id": "e88f4547-afa5-4c0d-ab6b-c8562504632a",
-      "name": "Cria Extensão Vetor"
+      "name": "Cria Extensão Vetor",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
@@ -94,7 +124,13 @@
         320
       ],
       "id": "5ec3d255-f111-4ba3-8f73-ba348db185d0",
-      "name": "Cria Tabela Chats"
+      "name": "Cria Tabela Chats",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
@@ -109,23 +145,13 @@
         1280
       ],
       "id": "cb174e76-60cf-4275-9288-b55d7602ab4e",
-      "name": "cria tabela de  id_imagens"
-    },
-    {
-      "parameters": {
-        "content": "",
-        "height": 1672,
-        "width": 2040,
-        "color": 3
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        128,
-        96
-      ],
-      "typeVersion": 1,
-      "id": "6cb8cb3e-74a6-443d-813d-a7bb19131102",
-      "name": "Sticky Note59"
+      "name": "cria tabela de  id_imagens",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
@@ -140,7 +166,13 @@
         320
       ],
       "id": "c080a273-935a-4336-9abd-a0536678b948",
-      "name": "Cria tabela tokens"
+      "name": "Cria tabela tokens",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
@@ -155,7 +187,13 @@
         320
       ],
       "id": "84f44a65-d4e4-44c3-8f4b-01331002d1c0",
-      "name": "Cria Tabela Chat_Messages"
+      "name": "Cria Tabela Chat_Messages",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
@@ -234,7 +272,13 @@
         1280
       ],
       "id": "5144e469-7e94-4e19-986a-aff6bbc3d59c",
-      "name": "Limpa Tabelas"
+      "name": "Limpa Tabelas",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
@@ -313,7 +357,13 @@
         336
       ],
       "id": "eded3854-5e45-4558-b514-0a5e19f59e5b",
-      "name": "Cria tabela profissionais"
+      "name": "Cria tabela profissionais",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
@@ -328,7 +378,13 @@
         544
       ],
       "id": "c97e9541-3698-4c32-a480-8623f8427517",
-      "name": "Exclui tabela de tokens"
+      "name": "Exclui tabela de tokens",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
@@ -343,7 +399,13 @@
         544
       ],
       "id": "6b3e959c-8e8b-4f58-ae85-c8c47b15553d",
-      "name": "Exclui tabela profissionais"
+      "name": "Exclui tabela profissionais",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
@@ -358,7 +420,13 @@
         560
       ],
       "id": "ff315793-5f76-4b81-812b-c9578a0c6134",
-      "name": "Exclui tabela Chat_Messages"
+      "name": "Exclui tabela Chat_Messages",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
@@ -373,7 +441,13 @@
         560
       ],
       "id": "84fd228d-300d-4542-a4e0-6ca08b3b8c47",
-      "name": "Exclui tabela Chats"
+      "name": "Exclui tabela Chats",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
@@ -388,12 +462,18 @@
         544
       ],
       "id": "8671698d-1534-4a41-ac7f-e3140237bbbd",
-      "name": "Exclui tabela Dados Cliente"
+      "name": "Exclui tabela Dados Cliente",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO public.profissionais (nome, uuid_calendar, especialidade)\nVALUES \n  ('João Silva','2193970cf8f6349fbd600194d2fef09b3ed4f22ee8f47b579814ca2cadea6c21@group.calendar.google.com', 'masculino'),\n  ('Maria Souza','c88ba3f68fa13fd2ecea2e2456d176acfa9762355f503c6440f273777a47e044@group.calendar.google.com', 'feminino');",
+        "query": "INSERT INTO public.profissionais (nome, uuid_calendar, especialidade)\nVALUES\n  ('Vinicius Martins','a5d3cdc229b6db940ebf9e9ff3b3a7d9f5a61ed99cf8ec81abcc76e85b7495fd@group.calendar.google.com', 'consultor');",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -403,7 +483,13 @@
         336
       ],
       "id": "509a2fb0-5ddb-41f9-816c-08d75a17870e",
-      "name": "Insere profissionais"
+      "name": "Insere profissionais",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
@@ -418,7 +504,13 @@
         768
       ],
       "id": "6caa8865-7fea-4607-bf34-66020de77f03",
-      "name": "Limpa tabela Chat_Messages"
+      "name": "Limpa tabela Chat_Messages",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
@@ -433,7 +525,13 @@
         768
       ],
       "id": "bc8d35cc-37de-48d4-8faf-7193bd2e0b26",
-      "name": "Limpa tabela Chats"
+      "name": "Limpa tabela Chats",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
@@ -448,7 +546,13 @@
         768
       ],
       "id": "f6636c48-1997-4ef7-b13f-18f175d65caf",
-      "name": "Limpa tabela Dados Cliente"
+      "name": "Limpa tabela Dados Cliente",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
@@ -463,7 +567,13 @@
         768
       ],
       "id": "4ec70219-9e95-4ae3-855f-851f5ad2139f",
-      "name": "Limpa tabela de tokens"
+      "name": "Limpa tabela de tokens",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
@@ -478,7 +588,13 @@
         544
       ],
       "id": "658c02cf-1a57-4cab-a4e4-f3c2da9e8060",
-      "name": "Limpa tabela profissionais"
+      "name": "Limpa tabela profissionais",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
@@ -509,7 +625,13 @@
         320
       ],
       "id": "a7899e20-954a-4e27-a591-ebebb4172a86",
-      "name": "Cria tabela agenda"
+      "name": "Cria tabela agenda",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
@@ -524,7 +646,13 @@
         560
       ],
       "id": "68ebb137-5a4c-45f3-aa95-b5d2ac113a18",
-      "name": "Exclui tabela de agenda"
+      "name": "Exclui tabela de agenda",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     },
     {
       "parameters": {
@@ -539,7 +667,13 @@
         784
       ],
       "id": "b4e1bda2-b9e3-41b1-a15c-23e1c9141d67",
-      "name": "Limpa tabela de agenda"
+      "name": "Limpa tabela de agenda",
+      "credentials": {
+        "postgres": {
+          "id": "UdXliX43FCMqvlLZ",
+          "name": "aivoraofc@gmail.com"
+        }
+      }
     }
   ],
   "connections": {},
@@ -547,9 +681,11 @@
     "executionOrder": "v1"
   },
   "staticData": null,
-  "meta": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
   "pinData": {},
-  "versionId": "15742451-47b2-4aff-be69-b177fac366d5",
+  "versionId": "895e2dac-a7a2-421d-b662-2a32feaa0f3e",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
