@@ -1,188 +1,235 @@
 {
-  "updatedAt": "2026-03-02T01:26:13.190Z",
+  "updatedAt": "2026-03-05T18:32:19.765Z",
   "createdAt": "2026-03-02T00:31:39.893Z",
   "id": "I2NBBzi236YP1odR",
   "name": "Solplanet - Diario + Mensal (WhatsApp) v5",
-  "active": false,
+  "active": true,
   "isArchived": false,
   "nodes": [
     {
       "parameters": {
-        "resource": "messages-api",
-        "instanceName": "Aivora",
-        "remoteJid": "={{ $('SplitInBatches Usuarios').item.json.telefone }}",
-        "messageText": "={{ $('Preparar Email').item.json.mensagem }}",
-        "options_message": {}
+        "jsCode": "const energia = parseFloat($json.energia_kwh || 0);\nconst mes = parseFloat($json.mes_kwh || 0);\n\nconst incluiHoje =\n  $json.mes_inclui_hoje === true ||\n  $json.mes_inclui_hoje === 'true';\n\nconst mesFinal = incluiHoje ? mes : (mes + energia);\n\nreturn [{\n  ...$json,\n  mes_kwh: mesFinal.toFixed(2),\n  mes_kwh_api: mes.toFixed(2),\n}];"
       },
-      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1168,
+        -368
+      ],
+      "id": "b77f6972-6bd4-4c75-bf16-e3ac55861029",
+      "name": "Ajustar Acumulado Mês"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2560,
+        304
+      ],
+      "id": "28f6a436-e040-49ff-b192-47128974d6d8",
+      "name": "Wait",
+      "webhookId": "3045b09d-f0b3-4cdb-9011-7d31c44f55c1"
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "bd9dde70-10f7-42b3-97aa-8c5a7904b74b",
+      "name": "SplitInBatches Usuarios",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 2,
+      "position": [
+        -1072,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "usuarios",
+        "limit": 1000
+      },
+      "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1840,
-        32
+        -1328,
+        -112
       ],
-      "id": "84f87c2f-a2e0-46d7-be90-1b7feb4255bf",
-      "name": "Enviar texto",
+      "id": "1ce709c4-6ffe-496c-b7db-0e9bfccb65af",
+      "name": "Get many rows",
       "credentials": {
-        "evolutionApi": {
-          "id": "vzR4It2iSNrEc05g",
-          "name": "EvolutionAivora"
+        "supabaseApi": {
+          "id": "UocZjWZfXsK0Ynmx",
+          "name": "SupabaseAgenteSolar"
         }
       }
     },
     {
       "parameters": {
-        "rule": {
-          "interval": [
+        "sendTo": "={{ $('SplitInBatches Usuarios').item.json.login }}",
+        "subject": "=Energia do dia Solplanet - {{ $now.format('dd-MM-yyyy') }}",
+        "message": "=<html lang=\"pt-BR\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Relatório Solar</title>\n</head>\n<body style=\"margin:0; padding:0; background:#f4f4f4; font-family:Arial, Helvetica, sans-serif;\">\n  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f4f4f4; padding:20px;\">\n    <tr>\n      <td align=\"center\">\n        <table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff; border-radius:8px; overflow:hidden;\">\n          <tr>\n            <td style=\"background:#001FAA; padding:25px; text-align:center;\">\n              <h1 style=\"margin:0; color:#ffffff; font-size:24px;\">Relatório Solar</h1>\n              <p style=\"margin:8px 0 0; color:#dbe3ff; font-size:14px;\">Atualização automática diária • {{ $now.format('dd-MM-yyyy') }}</p>\n            </td>\n          </tr>\n          <tr>\n            <td style=\"padding:30px; color:#333333; font-size:15px; line-height:1.6;\">\n              <p style=\"margin-top:0;\">Segue o resumo da sua geração fotovoltaica:</p>\n              <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-collapse:collapse; margin:18px 0;\">\n                <tr>\n                  <td style=\"padding:12px; border:1px solid #e6e6e6; background:#fafafa; font-weight:bold;\">Geração do dia</td>\n                  <td style=\"padding:12px; border:1px solid #e6e6e6;\">{{ $json.energia_kwh }} kWh</td>\n                </tr>\n                <tr>\n                  <td style=\"padding:12px; border:1px solid #e6e6e6; background:#fafafa; font-weight:bold;\">Acumulado do mês</td>\n                  <td style=\"padding:12px; border:1px solid #e6e6e6;\">{{ $json.mes_kwh }} kWh</td>\n                </tr>\n                <tr>\n                  <td style=\"padding:12px; border:1px solid #e6e6e6; background:#fafafa; font-weight:bold;\">Planta</td>\n                  <td style=\"padding:12px; border:1px solid #e6e6e6;\">{{ $json.plant_name }}</td>\n                </tr>\n              </table>\n              <div style=\"margin:20px 0; text-align:center;\">\n                <img src=\"{{ $json.chartDataUrl }}\" alt=\"Gráfico acumulado do mês\" style=\"max-width:100%; width:520px; border-radius:8px; display:block; margin:0 auto;\" />\n              </div>\n            </td>\n          </tr>\n          <tr>\n            <td style=\"background:#f0f0f0; padding:20px; text-align:center; font-size:12px; color:#777777;\">\n              Aivora<br>\n              Relatório automático Agente Solar<br><br>\n              Relatório automático de geração fotovoltaica. Obrigado por acompanhar sua produção de energia conosco.\n            </td>\n          </tr>\n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2320,
+        -128
+      ],
+      "id": "1132c3cb-7a63-4ec6-a8dc-0d667acfa9de",
+      "name": "Send a message",
+      "webhookId": "9c29beb4-b735-4c75-bac2-2bebb11bf55a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "XYDS5Ar7PcOAsAG7",
+          "name": "WinnerMidia"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = {\n  energia_kwh: String($json.energia_kwh || '0.00'),\n  mes_kwh: String($json.mes_kwh || '0.00'),\n  plant_name: String($json.plant_name || 'Planta'),\n  plant_id: $json.plant_id || null,\n  chartDataUrl: String($json.chartDataUrl || '')\n};\n\nreturn [data];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2048,
+        -128
+      ],
+      "id": "88f55241-7e44-4343-838b-86d7e0320e2c",
+      "name": "Consolidar Todos Dados"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1728,
+        -128
+      ],
+      "id": "af350a3d-e2f6-4adc-b122-5d408329a7b4",
+      "name": "Merge Email + Anexo"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
             {
-              "triggerAtHour": 20
+              "id": "9db134f6-1312-42d0-9b27-75a21036d5a1",
+              "name": "chartDataUrl",
+              "value": "={{ 'data:image/png;base64,' + $json.chartBase64 }}",
+              "type": "string"
             }
           ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1312,
+        288
+      ],
+      "id": "3343f312-0b19-4cc5-b2b4-17ae52f91ce3",
+      "name": "chartDataUrl"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "binaryPropertyName": "chart",
+        "destinationKey": "chartBase64",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1088,
+        288
+      ],
+      "id": "ae7d570a-df0f-49ee-8fcb-494cac8df06f",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $now;\nconst yyyy = d.toFormat('yyyy');\nconst mm = d.toFormat('LL');\n\nfor (const item of items) {\n  if (item.binary?.chart) {\n    item.binary.chart.fileName = `grafico-mensal-${yyyy}-${mm}.png`;\n  }\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        288
+      ],
+      "id": "a93b6af4-22bb-4f2c-9394-479b0302a845",
+      "name": "Nome do Arquivo"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://quickchart.io/chart",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chart",
+              "value": "={{ JSON.stringify($json.chart) }}"
+            },
+            {
+              "name": "width",
+              "value": "900"
+            },
+            {
+              "name": "height",
+              "value": "450"
+            },
+            {
+              "name": "format",
+              "value": "png"
+            },
+            {
+              "name": "backgroundColor",
+              "value": "white"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "chart"
+            }
+          }
         }
       },
-      "id": "875c3174-ec6f-494a-b57a-64d5e5273482",
-      "name": "Schedule 20h",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1,
-      "position": [
-        -1856,
-        -128
-      ]
-    },
-    {
-      "parameters": {
-        "url": "https://internation-cloud.solplanet.net/api/chart/production/international/daily",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "plantId",
-              "value": "={{$json.plant_id}}"
-            },
-            {
-              "name": "date",
-              "value": "={{$now.toFormat('yyyy-MM-dd')}}"
-            },
-            {
-              "name": "isno"
-            }
-          ]
-        },
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Cookie",
-              "value": "=acw_tc={{$node[\"Extrair Tokens\"].json.acw_tc}}; apitoken={{$node[\"Extrair Tokens\"].json.jwt}}"
-            },
-            {
-              "name": "token",
-              "value": "={{$node[\"Extrair Tokens\"].json.token}}"
-            },
-            {
-              "name": "locale",
-              "value": "pt_BR"
-            },
-            {
-              "name": "referer",
-              "value": "https://internation-cloud.solplanet.net/home/plant"
-            },
-            {
-              "name": "Accept",
-              "value": "application/json"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "c77924f7-8b29-43c9-af09-830d92b1f661",
-      "name": "Buscar Producao Dia",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
+      "typeVersion": 4.3,
       "position": [
-        32,
-        -496
-      ]
-    },
-    {
-      "parameters": {
-        "functionCode": "const values=($json.result?.data?.ac||[]).map(v=>parseFloat(v)||0);let soma=0;for(const v of values)soma+=v;const energia=soma/6;return[{energia_kwh:energia.toFixed(2)}];"
-      },
-      "id": "4ff3e7a0-e561-4fbf-a129-932e5e77008a",
-      "name": "Calcular kWh Dia",
-      "type": "n8n-nodes-base.function",
-      "typeVersion": 1,
-      "position": [
-        224,
-        -496
-      ]
-    },
-    {
-      "parameters": {
-        "url": "https://internation-cloud.solplanet.net/api/chart/production/international/month",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "plantId",
-              "value": "={{$json.plant_id}}"
-            },
-            {
-              "name": "date",
-              "value": "={{$now.toFormat('yyyy-MM')}}"
-            },
-            {
-              "name": "isno"
-            }
-          ]
-        },
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Cookie",
-              "value": "=acw_tc={{$node[\"Extrair Tokens\"].json.acw_tc}}; apitoken={{$node[\"Extrair Tokens\"].json.jwt}}"
-            },
-            {
-              "name": "token",
-              "value": "={{$node[\"Extrair Tokens\"].json.token}}"
-            },
-            {
-              "name": "locale",
-              "value": "pt_BR"
-            },
-            {
-              "name": "referer",
-              "value": "https://internation-cloud.solplanet.net/home/plant"
-            },
-            {
-              "name": "Accept",
-              "value": "application/json"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "40b212d8-42ae-4a2e-a3ff-26e7adb9e7b1",
-      "name": "Buscar Producao Mes",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [
-        -176,
+        656,
         288
-      ]
+      ],
+      "id": "09323443-df1d-4f6c-b820-c3278fd45cbb",
+      "name": "QuickChart"
     },
     {
       "parameters": {
-        "functionCode": "const unit=String($json.result?.unit||'').toLowerCase();const x=$json.result?.x||[];const arr=$json.result?.data?.ac||[];let sum=0;for(const v of arr)sum+=parseFloat(v)||0;if(unit==='kw'&&x.length>40)sum=sum/6;return[{mes_kwh:sum.toFixed(2)}];"
+        "jsCode": "const labels = $json.result?.x || [];\nconst arr = $json.result?.data?.ac || [];\nconst values = arr.map(v => Number(v) || 0);\n\nlet energiaDia = 0;\ntry {\n  energiaDia = parseFloat($items('Calcular kWh Dia')[0]?.json?.energia_kwh || 0);\n} catch (e) {\n  energiaDia = 0;\n}\n\nconst hojeLabel = $now.toFormat('dd');\nconst idx = labels.findIndex(l => String(l).padStart(2, '0') === hojeLabel);\n\nif (idx >= 0 && energiaDia > 0) {\n  const atual = Number(values[idx]) || 0;\n  if (atual <= 0.001) {\n    values[idx] = energiaDia;\n  }\n}\n\nconst totalMes = values.reduce((acc, v) => acc + v, 0);\n\nreturn [{\n  chart: {\n    type: 'bar',\n    data: {\n      labels,\n      datasets: [{\n        label: `Acumulado do mês (kWh): ${totalMes.toFixed(2)}`,\n        data: values,\n      }],\n    },\n    options: {\n      plugins: {\n        title: {\n          display: true,\n          text: `Acumulado do mês (kWh): ${totalMes.toFixed(2)}`,\n        },\n        legend: { display: true },\n      },\n      scales: { y: { beginAtZero: true } },\n    },\n  },\n  totalMes: totalMes.toFixed(2),\n}];"
       },
-      "id": "eb7eb3f7-9cec-4474-9807-e8957fdcc0f2",
-      "name": "Calcular kWh Mes",
-      "type": "n8n-nodes-base.function",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
-        80,
-        80
-      ]
+        448,
+        288
+      ],
+      "id": "6f20390c-1c9b-466c-8753-1bf856e10339",
+      "name": "Montar Chart Config Mes"
     },
     {
       "parameters": {
@@ -190,95 +237,26 @@
         "combinationMode": "mergeByPosition",
         "options": {}
       },
-      "id": "59fcddf8-0c98-4b02-b9c5-7016d4ad5aac",
-      "name": "Merge Dia+Mes",
+      "id": "be7101c3-1c70-4e4b-b106-576221f47802",
+      "name": "Merge com Nome Planta",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 2,
       "position": [
-        464,
-        -480
-      ]
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://internation-cloud.solplanet.net/api/user/login",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "account",
-              "value": "={{ $json.login }}"
-            },
-            {
-              "name": "password",
-              "value": "={{ $json.senha }}"
-            }
-          ]
-        },
-        "options": {
-          "response": {
-            "response": {
-              "fullResponse": true
-            }
-          }
-        }
-      },
-      "id": "02c397b1-d719-457b-bfae-66e0827d23f5",
-      "name": "Login Solplanet",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [
-        -1152,
-        -144
-      ],
-      "continueOnFail": true
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 1
-          },
-          "conditions": [
-            {
-              "id": "46c57d2e-b8eb-4c2d-a5e3-b3b86a17c543",
-              "leftValue": "=={{ $json.body?.data?.token || '' }}",
-              "rightValue": 0,
-              "operator": {
-                "type": "string",
-                "operation": "notEmpty",
-                "singleValue": true
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "id": "1e08bdef-1ebb-4aa2-9eaa-ab6d6b6d88f5",
-      "name": "Login OK?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2,
-      "position": [
-        -912,
+        1488,
         -144
       ]
     },
     {
       "parameters": {
-        "functionCode": "const body = $json.body;\nconst headers = $json.headers || {};\n\nif (!body?.data?.apitoken || !body?.data?.token) {\n  return [];\n}\n\nlet acw = '';\nconst sc = headers['set-cookie'] || [];\nfor (const c of sc) {\n  if (String(c).includes('acw_tc=')) {\n    acw = String(c).split(';')[0].replace('acw_tc=', '');\n    break;\n  }\n}\n\nreturn [{\n  jwt: body.data.apitoken,\n  token: body.data.token,\n  acw_tc: acw\n}];\n\n"
+        "functionCode": "const plantas = $json.result || [];\nconst p = plantas[0] || {};\n\nconst plantId = p.stationid ?? p.stationId ?? p.id ?? p.stationID;\nconst plantName = p.stationname ?? p.stationName ?? p.name ?? p.stationame;\n\nreturn [{\n  plant_name: plantName || 'Planta',\n  plant_id: plantId\n}];"
       },
-      "id": "8e7a767b-50f6-4edd-aa2d-e9783a2b8794",
-      "name": "Extrair Tokens",
+      "id": "5e791ae3-4086-4367-9300-a2d06731656f",
+      "name": "Extrair Nome Planta",
       "type": "n8n-nodes-base.function",
       "typeVersion": 1,
       "position": [
-        -640,
-        -272
+        192,
+        -128
       ]
     },
     {
@@ -331,27 +309,62 @@
         },
         "options": {}
       },
-      "id": "ade0cb41-805d-4e7e-bb5e-84a08c5ee80f",
+      "id": "83b44f8d-99f8-4654-8ba6-e94302366801",
       "name": "Buscar Lista de Plantas",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
       "position": [
-        -432,
-        -272
+        -32,
+        -128
       ]
     },
     {
       "parameters": {
-        "functionCode": "const plantas = $json.result || [];\nconst p = plantas[0] || {};\n\nconst plantId = p.stationid ?? p.stationId ?? p.id ?? p.stationID;\nconst plantName = p.stationname ?? p.stationName ?? p.name ?? p.stationame;\n\nreturn [{\n  plant_name: plantName || 'Planta',\n  plant_id: plantId\n}];"
+        "functionCode": "const body=$json.body;const headers=$json.headers||{};let acw='';const sc=headers['set-cookie']||[];for(const c of sc){if(c.includes('acw_tc=')){acw=c.split(';')[0].replace('acw_tc=','');break;}}return[{jwt:body.data.apitoken,token:body.data.token,acw_tc:acw}];"
       },
-      "id": "87cde467-f6b0-4dbf-a591-97777971eee3",
-      "name": "Extrair Nome Planta",
+      "id": "a08fc779-ce70-40fb-bdc0-a801716a8d17",
+      "name": "Extrair Tokens",
       "type": "n8n-nodes-base.function",
       "typeVersion": 1,
       "position": [
-        -224,
-        -272
+        -240,
+        -128
       ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://internation-cloud.solplanet.net/api/user/login",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "account",
+              "value": "={{ $json.login }}"
+            },
+            {
+              "name": "password",
+              "value": "={{ $json.senha }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "9301c779-130e-4c23-95f4-47d439d68ed6",
+      "name": "Login Solplanet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        -784,
+        -128
+      ],
+      "continueOnFail": true
     },
     {
       "parameters": {
@@ -359,225 +372,226 @@
         "combinationMode": "mergeByPosition",
         "options": {}
       },
-      "id": "66f3a21d-6888-421b-b75d-62d43076324a",
-      "name": "Merge com Nome Planta",
+      "id": "2d33cac8-f22a-458d-91d3-f4a680fef8fe",
+      "name": "Merge Dia+Mes",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 2,
       "position": [
-        880,
-        -144
+        928,
+        -368
       ]
     },
     {
       "parameters": {
-        "jsCode": "const labels = $json.result?.x || $json.result?.labels || [];\nconst dataObj = $json.result?.data || {};\nconst firstKey = Object.keys(dataObj)[0];\nconst valuesRaw = dataObj[firstKey] || [];\nconst values = valuesRaw.map(v => Number(v) || 0);\nconst totalMes = values.reduce((acc, v) => acc + v, 0);\n\nreturn [\n  {\n    chart: {\n      type: \"bar\",\n      data: {\n        labels,\n        datasets: [\n          {\n            label: `Acumulado do mês (kWh): ${totalMes.toFixed(2)}`,\n            data: values\n          }\n        ]\n      },\n      options: {\n        plugins: {\n          title: {\n            display: true,\n            text: `Acumulado do mês (kWh): ${totalMes.toFixed(2)}`\n          },\n          legend: { display: true }\n        },\n        scales: {\n          y: { beginAtZero: true }\n        }\n      }\n    },\n    totalMes: totalMes.toFixed(2)\n  }\n];"
+        "functionCode": "const unit = String($json.result?.unit || '').toLowerCase();\nconst labels = $json.result?.x || [];\nconst arr = $json.result?.data?.ac || [];\n\nlet sum = 0;\nfor (const v of arr) sum += parseFloat(v) || 0;\n\nconst hojeLabel = String(new Date().getDate()).padStart(2, '0');\nconst idx = labels.findIndex(l => String(l).padStart(2, '0') === hojeLabel);\nlet hojeNoMes = idx >= 0 ? (parseFloat(arr[idx]) || 0) : 0;\n\nif (unit === 'kw' && labels.length > 40) {\n  sum = sum / 6;\n  hojeNoMes = hojeNoMes / 6;\n}\n\nreturn [{\n  mes_kwh: sum.toFixed(2),\n  mes_hoje_kwh: hojeNoMes.toFixed(2),\n  mes_inclui_hoje: hojeNoMes > 0,\n}];"
       },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        48,
-        288
-      ],
-      "id": "a965c3d4-1e49-4235-8aa7-5cc06ef2071d",
-      "name": "Montar Chart Config Mes"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://quickchart.io/chart",
-        "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "chart",
-              "value": "={{ JSON.stringify($json.chart) }}"
-            },
-            {
-              "name": "width",
-              "value": "900"
-            },
-            {
-              "name": "height",
-              "value": "450"
-            },
-            {
-              "name": "format",
-              "value": "png"
-            },
-            {
-              "name": "backgroundColor",
-              "value": "white"
-            }
-          ]
-        },
-        "options": {
-          "response": {
-            "response": {
-              "responseFormat": "file",
-              "outputPropertyName": "chart"
-            }
-          }
-        }
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.3,
-      "position": [
-        256,
-        288
-      ],
-      "id": "afafd288-a757-460e-a860-11dd6a2e1a33",
-      "name": "QuickChart"
-    },
-    {
-      "parameters": {
-        "jsCode": "const d = $now;\nconst yyyy = d.toFormat('yyyy');\nconst mm = d.toFormat('LL');\n\nfor (const item of items) {\n  if (item.binary?.chart) {\n    item.binary.chart.fileName = `grafico-mensal-${yyyy}-${mm}.png`;\n  }\n}\n\nreturn items;"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        464,
-        288
-      ],
-      "id": "8a211959-bbe2-4a93-86cc-877b1948c2b9",
-      "name": "Nome do Arquivo"
-    },
-    {
-      "parameters": {
-        "operation": "binaryToPropery",
-        "binaryPropertyName": "chart",
-        "destinationKey": "chartBase64",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.extractFromFile",
-      "typeVersion": 1.1,
-      "position": [
-        672,
-        288
-      ],
-      "id": "a2713077-dd9c-4358-8bf3-23cbcb6e7483",
-      "name": "Extract from File"
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "9db134f6-1312-42d0-9b27-75a21036d5a1",
-              "name": "chartDataUrl",
-              "value": "={{ 'data:image/png;base64,' + $json.chartBase64 }}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        864,
-        288
-      ],
-      "id": "8c69fb02-2bab-4c1e-9386-bf8a94b8210c",
-      "name": "chartDataUrl"
-    },
-    {
-      "parameters": {
-        "mode": "combine",
-        "combineBy": "combineByPosition",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        1120,
-        -128
-      ],
-      "id": "01778677-d34a-4c9a-8d76-817a4c6f9429",
-      "name": "Merge Email + Anexo"
-    },
-    {
-      "parameters": {
-        "jsCode": "// Garante que todos os dados estão presentes com fallback\nconst data = {\n  energia_kwh: String($json.energia_kwh || '0.00'),\n  mes_kwh: String($json.mes_kwh || '0.00'),\n  plant_name: String($json.plant_name || 'Planta'),\n  plant_id: $json.plant_id || null,\n  chartDataUrl: String($json.chartDataUrl || '')\n};\n\nreturn [data];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1328,
-        -128
-      ],
-      "id": "5ce73902-c22d-4228-9811-424cab86dc09",
-      "name": "Consolidar Todos Dados"
-    },
-    {
-      "parameters": {
-        "jsCode": "const energia_kwh = String($json.energia_kwh || '0.00');\nconst mes_kwh = String($json.mes_kwh || '0.00');\nconst plant_name = String($json.plant_name || 'Planta');\nconst chartDataUrl = String($json.chartDataUrl || '');\nconst data_formatada = $now.toFormat('dd/MM/yyyy');\n\nconst htmlEmail = `<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Relatório Solar</title>\n</head>\n<body style=\"margin:0; padding:0; background:#f4f4f4; font-family:Arial, Helvetica, sans-serif;\">\n  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f4f4f4; padding:20px;\">\n    <tr>\n      <td align=\"center\">\n        <table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff; border-radius:8px; overflow:hidden;\">\n          <tr>\n            <td style=\"background:#001FAA; padding:25px; text-align:center;\">\n              <h1 style=\"margin:0; color:#ffffff; font-size:24px;\">Relatório Solar</h1>\n              <p style=\"margin:8px 0 0; color:#dbe3ff; font-size:14px;\">Atualização automática diária • ${data_formatada}</p>\n            </td>\n          </tr>\n          <tr>\n            <td style=\"padding:30px; color:#333333; font-size:15px; line-height:1.6;\">\n              <p style=\"margin-top:0;\">Segue o resumo da sua geração fotovoltaica:</p>\n              <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-collapse:collapse; margin:18px 0;\">\n                <tr>\n                  <td style=\"padding:12px; border:1px solid #e6e6e6; background:#fafafa; font-weight:bold;\">Geração do dia</td>\n                  <td style=\"padding:12px; border:1px solid #e6e6e6;\">${energia_kwh} kWh</td>\n                </tr>\n                <tr>\n                  <td style=\"padding:12px; border:1px solid #e6e6e6; background:#fafafa; font-weight:bold;\">Acumulado do mês</td>\n                  <td style=\"padding:12px; border:1px solid #e6e6e6;\">${mes_kwh} kWh</td>\n                </tr>\n                <tr>\n                  <td style=\"padding:12px; border:1px solid #e6e6e6; background:#fafafa; font-weight:bold;\">Planta</td>\n                  <td style=\"padding:12px; border:1px solid #e6e6e6;\">${plant_name}</td>\n                </tr>\n              </table>\n              <div style=\"margin:20px 0; text-align:center;\">\n                <img src=\"${chartDataUrl}\" alt=\"Gráfico acumulado do mês\" style=\"max-width:100%; width:520px; border-radius:8px; display:block; margin:0 auto;\" />\n              </div>\n            </td>\n          </tr>\n          <tr>\n            <td style=\"background:#f0f0f0; padding:20px; text-align:center; font-size:12px; color:#777777;\">\n              Aivora<br>\n              Relatório automático Agente Solar<br><br>\n              Relatório automático de geração fotovoltaica. Obrigado por acompanhar sua produção de energia conosco.\n            </td>\n          </tr>\n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>`;\n\nconst mensagem = `🌞 *Relatório Solar*\\n📅 ${data_formatada}\\n\\n⚡ *Geração do dia:* ${energia_kwh} kWh\\n📊 *Acumulado do mês:* ${mes_kwh} kWh\\n🏭 *Planta:* ${plant_name}\\n\\n☀️ Energia limpa gerando resultados!`;\n\nreturn [{\n  energia_kwh,\n  mes_kwh,\n  plant_name,\n  chartDataUrl,\n  htmlEmail,\n  mensagem,\n  subject: `🌞 Relatório Solar - ${data_formatada} - ${plant_name}`\n}];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1536,
-        -128
-      ],
-      "id": "f7cc1e3f-5faf-47c0-a14c-e500066c7989",
-      "name": "Preparar Email"
-    },
-    {
-      "parameters": {
-        "sendTo": "={{ $('SplitInBatches Usuarios').item.json.login }}",
-        "subject": "={{$json.subject}}",
-        "message": "={{$json.htmlEmail}}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
-        1824,
-        -240
-      ],
-      "id": "ec26fa7f-54a7-4be4-970f-21d323242c72",
-      "name": "Send a message",
-      "webhookId": "9c29beb4-b735-4c75-bac2-2bebb11bf55a",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "XYDS5Ar7PcOAsAG7",
-          "name": "WinnerMidia"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "getAll",
-        "tableId": "usuarios",
-        "limit": 1000
-      },
-      "type": "n8n-nodes-base.supabase",
+      "id": "64b6421f-e5f7-4da5-a9da-3c45bdd03243",
+      "name": "Calcular kWh Mes",
+      "type": "n8n-nodes-base.function",
       "typeVersion": 1,
       "position": [
-        -1648,
+        496,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://internation-cloud.solplanet.net/api/chart/production/international/month",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "plantId",
+              "value": "={{$json.plant_id}}"
+            },
+            {
+              "name": "date",
+              "value": "={{$now.toFormat('yyyy-MM')}}"
+            },
+            {
+              "name": "isno"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Cookie",
+              "value": "=acw_tc={{$node[\"Extrair Tokens\"].json.acw_tc}}; apitoken={{$node[\"Extrair Tokens\"].json.jwt}}"
+            },
+            {
+              "name": "token",
+              "value": "={{$node[\"Extrair Tokens\"].json.token}}"
+            },
+            {
+              "name": "locale",
+              "value": "pt_BR"
+            },
+            {
+              "name": "referer",
+              "value": "https://internation-cloud.solplanet.net/home/plant"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2a549cc6-fdff-4a03-ae9d-4ca40757a221",
+      "name": "Buscar Producao Mes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        224,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const values=($json.result?.data?.ac||[]).map(v=>parseFloat(v)||0);let soma=0;for(const v of values)soma+=v;const energia=soma/6;return[{energia_kwh:energia.toFixed(2)}];"
+      },
+      "id": "f64d8667-a935-4c9b-bf78-c90d01267d14",
+      "name": "Calcular kWh Dia",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        688,
+        -384
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://internation-cloud.solplanet.net/api/chart/production/international/daily",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "plantId",
+              "value": "={{$json.plant_id}}"
+            },
+            {
+              "name": "date",
+              "value": "={{$now.toFormat('yyyy-MM-dd')}}"
+            },
+            {
+              "name": "isno"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Cookie",
+              "value": "=acw_tc={{$node[\"Extrair Tokens\"].json.acw_tc}}; apitoken={{$node[\"Extrair Tokens\"].json.jwt}}"
+            },
+            {
+              "name": "token",
+              "value": "={{$node[\"Extrair Tokens\"].json.token}}"
+            },
+            {
+              "name": "locale",
+              "value": "pt_BR"
+            },
+            {
+              "name": "referer",
+              "value": "https://internation-cloud.solplanet.net/home/plant"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f3c1f724-21c1-4868-ade3-0cb56b188fc6",
+      "name": "Buscar Producao Dia",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        480,
+        -384
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 20
+            }
+          ]
+        }
+      },
+      "id": "7459ba7b-7237-4f03-9b76-0c36fde7e360",
+      "name": "Schedule 20h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1568,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "Aivora",
+        "remoteJid": "={{ $('SplitInBatches Usuarios').item.json.telefone }}",
+        "messageText": "=🌞 Relatório Solar\n📅 {{ $now.format('dd-MM-yyyy') }}\n\n⚡ Geração do dia: {{ $('Consolidar Todos Dados').item.json.energia_kwh }} kWh\n📊 Acumulado do mês: {{ $('Consolidar Todos Dados').item.json.mes_kwh }} kWh\n🏭 Planta: {{ $('Consolidar Todos Dados').item.json.plant_name }}\n\n☀️ Energia limpa gerando resultados!",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        2560,
         -128
       ],
-      "id": "fb490076-b82e-409b-99d1-224bf7f4a6ad",
-      "name": "Get many rows",
+      "id": "e4863674-4a51-4215-9d79-e4e93fc4fe46",
+      "name": "Enviar texto",
       "credentials": {
-        "supabaseApi": {
-          "id": "UocZjWZfXsK0Ynmx",
-          "name": "SupabaseAgenteSolar"
+        "evolutionApi": {
+          "id": "vzR4It2iSNrEc05g",
+          "name": "EvolutionAivora"
         }
       }
     },
     {
       "parameters": {
-        "batchSize": 1,
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "af6ec9f7-529b-49e1-bb18-0626ce894f38",
+              "leftValue": "={{ $json.body.data.apitoken }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
         "options": {}
       },
-      "id": "83adb48b-d1bc-41a0-b353-e2c7506ac526",
-      "name": "SplitInBatches Usuarios",
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 2,
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
       "position": [
-        -1408,
-        -128
-      ]
+        -560,
+        -112
+      ],
+      "id": "c5b04ee0-d726-441b-9214-51fe265620cc",
+      "name": "If"
     },
     {
       "parameters": {
@@ -586,131 +600,16 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        1840,
-        304
+        -384,
+        0
       ],
-      "id": "1486b67b-abf0-459f-837c-ba17d648524c",
-      "name": "Wait",
-      "webhookId": "3045b09d-f0b3-4cdb-9011-7d31c44f55c1"
-    },
-    {
-      "parameters": {
-        "tableId": "logs_login",
-        "fieldsUi": {
-          "fieldValues": [
-            {
-              "fieldId": "created_at",
-              "fieldValue": "={{ $now.toISO() }}"
-            },
-            {
-              "fieldId": "nome",
-              "fieldValue": "={{ $('SplitInBatches Usuarios').item.json.Nome || $('SplitInBatches Usuarios').item.json.nome || '' }}"
-            },
-            {
-              "fieldId": "login",
-              "fieldValue": "={{ $('SplitInBatches Usuarios').item.json.login || '' }}"
-            },
-            {
-              "fieldId": "email",
-              "fieldValue": "={{ $('SplitInBatches Usuarios').item.json.email || '' }}"
-            },
-            {
-              "fieldId": "telefone",
-              "fieldValue": "={{ $('SplitInBatches Usuarios').item.json.telefone || '' }}"
-            },
-            {
-              "fieldId": "status_code",
-              "fieldValue": "={{ $json.statusCode ?? $json.status ?? '' }}"
-            },
-            {
-              "fieldId": "error_message",
-              "fieldValue": "={{ $json.body?.message || $json.body?.msg || $json.body?.error || $json.error?.message || '' }}"
-            },
-            {
-              "fieldId": "response_body",
-              "fieldValue": "={{ JSON.stringify($json.body || $json) }}"
-            }
-          ]
-        }
-      },
-      "type": "n8n-nodes-base.supabase",
-      "typeVersion": 1,
-      "position": [
-        -624,
-        -64
-      ],
-      "id": "0b133ba5-1f91-48cd-a7b4-96258794ffa0",
-      "name": "Log Falha Login",
-      "credentials": {
-        "supabaseApi": {
-          "id": "UocZjWZfXsK0Ynmx",
-          "name": "SupabaseAgenteSolar"
-        }
-      }
+      "id": "f9974b10-7e99-47ed-9828-9016f7a5c6a7",
+      "name": "Wait1",
+      "webhookId": "43463973-082e-4c75-8301-a13593171c41"
     }
   ],
   "connections": {
-    "Schedule 20h": {
-      "main": [
-        [
-          {
-            "node": "Get many rows",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Buscar Producao Dia": {
-      "main": [
-        [
-          {
-            "node": "Calcular kWh Dia",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Calcular kWh Dia": {
-      "main": [
-        [
-          {
-            "node": "Merge Dia+Mes",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Buscar Producao Mes": {
-      "main": [
-        [
-          {
-            "node": "Calcular kWh Mes",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Montar Chart Config Mes",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Calcular kWh Mes": {
-      "main": [
-        [
-          {
-            "node": "Merge Dia+Mes",
-            "type": "main",
-            "index": 1
-          }
-        ]
-      ]
-    },
-    "Merge Dia+Mes": {
+    "Ajustar Acumulado Mês": {
       "main": [
         [
           {
@@ -721,189 +620,7 @@
         ]
       ]
     },
-    "Login Solplanet": {
-      "main": [
-        [
-          {
-            "node": "Login OK?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Login OK?": {
-      "main": [
-        [
-          {
-            "node": "Extrair Tokens",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Log Falha Login",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Log Falha Login": {
-      "main": [
-        [
-          {
-            "node": "Wait",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Extrair Tokens": {
-      "main": [
-        [
-          {
-            "node": "Buscar Lista de Plantas",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Buscar Lista de Plantas": {
-      "main": [
-        [
-          {
-            "node": "Extrair Nome Planta",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Extrair Nome Planta": {
-      "main": [
-        [
-          {
-            "node": "Buscar Producao Dia",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Buscar Producao Mes",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Merge com Nome Planta",
-            "type": "main",
-            "index": 1
-          }
-        ]
-      ]
-    },
-    "Merge com Nome Planta": {
-      "main": [
-        [
-          {
-            "node": "Merge Email + Anexo",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Montar Chart Config Mes": {
-      "main": [
-        [
-          {
-            "node": "QuickChart",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "QuickChart": {
-      "main": [
-        [
-          {
-            "node": "Nome do Arquivo",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Nome do Arquivo": {
-      "main": [
-        [
-          {
-            "node": "Extract from File",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Extract from File": {
-      "main": [
-        [
-          {
-            "node": "chartDataUrl",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "chartDataUrl": {
-      "main": [
-        [
-          {
-            "node": "Merge Email + Anexo",
-            "type": "main",
-            "index": 1
-          }
-        ]
-      ]
-    },
-    "Merge Email + Anexo": {
-      "main": [
-        [
-          {
-            "node": "Consolidar Todos Dados",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Consolidar Todos Dados": {
-      "main": [
-        [
-          {
-            "node": "Preparar Email",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Preparar Email": {
-      "main": [
-        [
-          {
-            "node": "Send a message",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get many rows": {
+    "Wait": {
       "main": [
         [
           {
@@ -925,11 +642,230 @@
         ]
       ]
     },
+    "Get many rows": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches Usuarios",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Send a message": {
       "main": [
         [
           {
             "node": "Enviar texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consolidar Todos Dados": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Email + Anexo": {
+      "main": [
+        [
+          {
+            "node": "Consolidar Todos Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "chartDataUrl": {
+      "main": [
+        [
+          {
+            "node": "Merge Email + Anexo",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "chartDataUrl",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nome do Arquivo": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "QuickChart": {
+      "main": [
+        [
+          {
+            "node": "Nome do Arquivo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Chart Config Mes": {
+      "main": [
+        [
+          {
+            "node": "QuickChart",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge com Nome Planta": {
+      "main": [
+        [
+          {
+            "node": "Merge Email + Anexo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair Nome Planta": {
+      "main": [
+        [
+          {
+            "node": "Buscar Producao Mes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Buscar Producao Dia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Lista de Plantas": {
+      "main": [
+        [
+          {
+            "node": "Extrair Nome Planta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair Tokens": {
+      "main": [
+        [
+          {
+            "node": "Buscar Lista de Plantas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Login Solplanet": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Dia+Mes": {
+      "main": [
+        [
+          {
+            "node": "Ajustar Acumulado Mês",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcular kWh Mes": {
+      "main": [
+        [
+          {
+            "node": "Merge Dia+Mes",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Buscar Producao Mes": {
+      "main": [
+        [
+          {
+            "node": "Montar Chart Config Mes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Calcular kWh Mes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcular kWh Dia": {
+      "main": [
+        [
+          {
+            "node": "Merge Dia+Mes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Producao Dia": {
+      "main": [
+        [
+          {
+            "node": "Calcular kWh Dia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule 20h": {
+      "main": [
+        [
+          {
+            "node": "Get many rows",
             "type": "main",
             "index": 0
           }
@@ -947,7 +883,25 @@
         ]
       ]
     },
-    "Wait": {
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Extrair Tokens",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
       "main": [
         [
           {
@@ -960,14 +914,19 @@
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "availableInMCP": true
   },
-  "staticData": null,
+  "staticData": {
+    "node:Schedule 20h": {
+      "recurrenceRules": []
+    }
+  },
   "meta": null,
   "pinData": {},
-  "versionId": "8a235cc4-fe6a-44c0-8b15-0f5e7fe127f9",
-  "activeVersionId": null,
-  "triggerCount": 0,
+  "versionId": "917c00a4-e900-4fb7-8cea-c80e93bd5ddf",
+  "activeVersionId": "917c00a4-e900-4fb7-8cea-c80e93bd5ddf",
+  "triggerCount": 1,
   "shared": [
     {
       "updatedAt": "2026-03-02T00:31:39.893Z",
@@ -977,6 +936,922 @@
       "projectId": "v0LdrnPHSqH3q9P1"
     }
   ],
-  "activeVersion": null,
+  "activeVersion": {
+    "updatedAt": "2026-03-05T18:32:19.767Z",
+    "createdAt": "2026-03-05T18:32:19.767Z",
+    "versionId": "917c00a4-e900-4fb7-8cea-c80e93bd5ddf",
+    "workflowId": "I2NBBzi236YP1odR",
+    "nodes": [
+      {
+        "parameters": {
+          "jsCode": "const energia = parseFloat($json.energia_kwh || 0);\nconst mes = parseFloat($json.mes_kwh || 0);\n\nconst incluiHoje =\n  $json.mes_inclui_hoje === true ||\n  $json.mes_inclui_hoje === 'true';\n\nconst mesFinal = incluiHoje ? mes : (mes + energia);\n\nreturn [{\n  ...$json,\n  mes_kwh: mesFinal.toFixed(2),\n  mes_kwh_api: mes.toFixed(2),\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1168,
+          -368
+        ],
+        "id": "b77f6972-6bd4-4c75-bf16-e3ac55861029",
+        "name": "Ajustar Acumulado Mês"
+      },
+      {
+        "parameters": {
+          "amount": 2
+        },
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1,
+        "position": [
+          2560,
+          304
+        ],
+        "id": "28f6a436-e040-49ff-b192-47128974d6d8",
+        "name": "Wait",
+        "webhookId": "3045b09d-f0b3-4cdb-9011-7d31c44f55c1"
+      },
+      {
+        "parameters": {
+          "batchSize": 1,
+          "options": {}
+        },
+        "id": "bd9dde70-10f7-42b3-97aa-8c5a7904b74b",
+        "name": "SplitInBatches Usuarios",
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 2,
+        "position": [
+          -1072,
+          -112
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "getAll",
+          "tableId": "usuarios",
+          "limit": 1000
+        },
+        "type": "n8n-nodes-base.supabase",
+        "typeVersion": 1,
+        "position": [
+          -1328,
+          -112
+        ],
+        "id": "1ce709c4-6ffe-496c-b7db-0e9bfccb65af",
+        "name": "Get many rows",
+        "credentials": {
+          "supabaseApi": {
+            "id": "UocZjWZfXsK0Ynmx",
+            "name": "SupabaseAgenteSolar"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "sendTo": "={{ $('SplitInBatches Usuarios').item.json.login }}",
+          "subject": "=Energia do dia Solplanet - {{ $now.format('dd-MM-yyyy') }}",
+          "message": "=<html lang=\"pt-BR\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Relatório Solar</title>\n</head>\n<body style=\"margin:0; padding:0; background:#f4f4f4; font-family:Arial, Helvetica, sans-serif;\">\n  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f4f4f4; padding:20px;\">\n    <tr>\n      <td align=\"center\">\n        <table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff; border-radius:8px; overflow:hidden;\">\n          <tr>\n            <td style=\"background:#001FAA; padding:25px; text-align:center;\">\n              <h1 style=\"margin:0; color:#ffffff; font-size:24px;\">Relatório Solar</h1>\n              <p style=\"margin:8px 0 0; color:#dbe3ff; font-size:14px;\">Atualização automática diária • {{ $now.format('dd-MM-yyyy') }}</p>\n            </td>\n          </tr>\n          <tr>\n            <td style=\"padding:30px; color:#333333; font-size:15px; line-height:1.6;\">\n              <p style=\"margin-top:0;\">Segue o resumo da sua geração fotovoltaica:</p>\n              <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-collapse:collapse; margin:18px 0;\">\n                <tr>\n                  <td style=\"padding:12px; border:1px solid #e6e6e6; background:#fafafa; font-weight:bold;\">Geração do dia</td>\n                  <td style=\"padding:12px; border:1px solid #e6e6e6;\">{{ $json.energia_kwh }} kWh</td>\n                </tr>\n                <tr>\n                  <td style=\"padding:12px; border:1px solid #e6e6e6; background:#fafafa; font-weight:bold;\">Acumulado do mês</td>\n                  <td style=\"padding:12px; border:1px solid #e6e6e6;\">{{ $json.mes_kwh }} kWh</td>\n                </tr>\n                <tr>\n                  <td style=\"padding:12px; border:1px solid #e6e6e6; background:#fafafa; font-weight:bold;\">Planta</td>\n                  <td style=\"padding:12px; border:1px solid #e6e6e6;\">{{ $json.plant_name }}</td>\n                </tr>\n              </table>\n              <div style=\"margin:20px 0; text-align:center;\">\n                <img src=\"{{ $json.chartDataUrl }}\" alt=\"Gráfico acumulado do mês\" style=\"max-width:100%; width:520px; border-radius:8px; display:block; margin:0 auto;\" />\n              </div>\n            </td>\n          </tr>\n          <tr>\n            <td style=\"background:#f0f0f0; padding:20px; text-align:center; font-size:12px; color:#777777;\">\n              Aivora<br>\n              Relatório automático Agente Solar<br><br>\n              Relatório automático de geração fotovoltaica. Obrigado por acompanhar sua produção de energia conosco.\n            </td>\n          </tr>\n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          2320,
+          -128
+        ],
+        "id": "1132c3cb-7a63-4ec6-a8dc-0d667acfa9de",
+        "name": "Send a message",
+        "webhookId": "9c29beb4-b735-4c75-bac2-2bebb11bf55a",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "XYDS5Ar7PcOAsAG7",
+            "name": "WinnerMidia"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const data = {\n  energia_kwh: String($json.energia_kwh || '0.00'),\n  mes_kwh: String($json.mes_kwh || '0.00'),\n  plant_name: String($json.plant_name || 'Planta'),\n  plant_id: $json.plant_id || null,\n  chartDataUrl: String($json.chartDataUrl || '')\n};\n\nreturn [data];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2048,
+          -128
+        ],
+        "id": "88f55241-7e44-4343-838b-86d7e0320e2c",
+        "name": "Consolidar Todos Dados"
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "combineBy": "combineByPosition",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1728,
+          -128
+        ],
+        "id": "af350a3d-e2f6-4adc-b122-5d408329a7b4",
+        "name": "Merge Email + Anexo"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "9db134f6-1312-42d0-9b27-75a21036d5a1",
+                "name": "chartDataUrl",
+                "value": "={{ 'data:image/png;base64,' + $json.chartBase64 }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          1312,
+          288
+        ],
+        "id": "3343f312-0b19-4cc5-b2b4-17ae52f91ce3",
+        "name": "chartDataUrl"
+      },
+      {
+        "parameters": {
+          "operation": "binaryToPropery",
+          "binaryPropertyName": "chart",
+          "destinationKey": "chartBase64",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.extractFromFile",
+        "typeVersion": 1.1,
+        "position": [
+          1088,
+          288
+        ],
+        "id": "ae7d570a-df0f-49ee-8fcb-494cac8df06f",
+        "name": "Extract from File"
+      },
+      {
+        "parameters": {
+          "jsCode": "const d = $now;\nconst yyyy = d.toFormat('yyyy');\nconst mm = d.toFormat('LL');\n\nfor (const item of items) {\n  if (item.binary?.chart) {\n    item.binary.chart.fileName = `grafico-mensal-${yyyy}-${mm}.png`;\n  }\n}\n\nreturn items;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          864,
+          288
+        ],
+        "id": "a93b6af4-22bb-4f2c-9394-479b0302a845",
+        "name": "Nome do Arquivo"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://quickchart.io/chart",
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "chart",
+                "value": "={{ JSON.stringify($json.chart) }}"
+              },
+              {
+                "name": "width",
+                "value": "900"
+              },
+              {
+                "name": "height",
+                "value": "450"
+              },
+              {
+                "name": "format",
+                "value": "png"
+              },
+              {
+                "name": "backgroundColor",
+                "value": "white"
+              }
+            ]
+          },
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "file",
+                "outputPropertyName": "chart"
+              }
+            }
+          }
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          656,
+          288
+        ],
+        "id": "09323443-df1d-4f6c-b820-c3278fd45cbb",
+        "name": "QuickChart"
+      },
+      {
+        "parameters": {
+          "jsCode": "const labels = $json.result?.x || [];\nconst arr = $json.result?.data?.ac || [];\nconst values = arr.map(v => Number(v) || 0);\n\nlet energiaDia = 0;\ntry {\n  energiaDia = parseFloat($items('Calcular kWh Dia')[0]?.json?.energia_kwh || 0);\n} catch (e) {\n  energiaDia = 0;\n}\n\nconst hojeLabel = $now.toFormat('dd');\nconst idx = labels.findIndex(l => String(l).padStart(2, '0') === hojeLabel);\n\nif (idx >= 0 && energiaDia > 0) {\n  const atual = Number(values[idx]) || 0;\n  if (atual <= 0.001) {\n    values[idx] = energiaDia;\n  }\n}\n\nconst totalMes = values.reduce((acc, v) => acc + v, 0);\n\nreturn [{\n  chart: {\n    type: 'bar',\n    data: {\n      labels,\n      datasets: [{\n        label: `Acumulado do mês (kWh): ${totalMes.toFixed(2)}`,\n        data: values,\n      }],\n    },\n    options: {\n      plugins: {\n        title: {\n          display: true,\n          text: `Acumulado do mês (kWh): ${totalMes.toFixed(2)}`,\n        },\n        legend: { display: true },\n      },\n      scales: { y: { beginAtZero: true } },\n    },\n  },\n  totalMes: totalMes.toFixed(2),\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          448,
+          288
+        ],
+        "id": "6f20390c-1c9b-466c-8753-1bf856e10339",
+        "name": "Montar Chart Config Mes"
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "combinationMode": "mergeByPosition",
+          "options": {}
+        },
+        "id": "be7101c3-1c70-4e4b-b106-576221f47802",
+        "name": "Merge com Nome Planta",
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 2,
+        "position": [
+          1488,
+          -144
+        ]
+      },
+      {
+        "parameters": {
+          "functionCode": "const plantas = $json.result || [];\nconst p = plantas[0] || {};\n\nconst plantId = p.stationid ?? p.stationId ?? p.id ?? p.stationID;\nconst plantName = p.stationname ?? p.stationName ?? p.name ?? p.stationame;\n\nreturn [{\n  plant_name: plantName || 'Planta',\n  plant_id: plantId\n}];"
+        },
+        "id": "5e791ae3-4086-4367-9300-a2d06731656f",
+        "name": "Extrair Nome Planta",
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1,
+        "position": [
+          192,
+          -128
+        ]
+      },
+      {
+        "parameters": {
+          "url": "https://internation-cloud.solplanet.net/api/plant/plantList",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "own",
+                "value": "1"
+              },
+              {
+                "name": "type",
+                "value": "1"
+              },
+              {
+                "name": "name"
+              },
+              {
+                "name": "state",
+                "value": "0"
+              }
+            ]
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Cookie",
+                "value": "=acw_tc={{$json.acw_tc}}; apitoken={{$json.jwt}}"
+              },
+              {
+                "name": "token",
+                "value": "={{$json.token}}"
+              },
+              {
+                "name": "locale",
+                "value": "pt_BR"
+              },
+              {
+                "name": "referer",
+                "value": "https://internation-cloud.solplanet.net/home/plantlist"
+              },
+              {
+                "name": "Accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "83b44f8d-99f8-4654-8ba6-e94302366801",
+        "name": "Buscar Lista de Plantas",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          -32,
+          -128
+        ]
+      },
+      {
+        "parameters": {
+          "functionCode": "const body=$json.body;const headers=$json.headers||{};let acw='';const sc=headers['set-cookie']||[];for(const c of sc){if(c.includes('acw_tc=')){acw=c.split(';')[0].replace('acw_tc=','');break;}}return[{jwt:body.data.apitoken,token:body.data.token,acw_tc:acw}];"
+        },
+        "id": "a08fc779-ce70-40fb-bdc0-a801716a8d17",
+        "name": "Extrair Tokens",
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1,
+        "position": [
+          -240,
+          -128
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://internation-cloud.solplanet.net/api/user/login",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "account",
+                "value": "={{ $json.login }}"
+              },
+              {
+                "name": "password",
+                "value": "={{ $json.senha }}"
+              }
+            ]
+          },
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            }
+          }
+        },
+        "id": "9301c779-130e-4c23-95f4-47d439d68ed6",
+        "name": "Login Solplanet",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          -784,
+          -128
+        ],
+        "continueOnFail": true
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "combinationMode": "mergeByPosition",
+          "options": {}
+        },
+        "id": "2d33cac8-f22a-458d-91d3-f4a680fef8fe",
+        "name": "Merge Dia+Mes",
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 2,
+        "position": [
+          928,
+          -368
+        ]
+      },
+      {
+        "parameters": {
+          "functionCode": "const unit = String($json.result?.unit || '').toLowerCase();\nconst labels = $json.result?.x || [];\nconst arr = $json.result?.data?.ac || [];\n\nlet sum = 0;\nfor (const v of arr) sum += parseFloat(v) || 0;\n\nconst hojeLabel = String(new Date().getDate()).padStart(2, '0');\nconst idx = labels.findIndex(l => String(l).padStart(2, '0') === hojeLabel);\nlet hojeNoMes = idx >= 0 ? (parseFloat(arr[idx]) || 0) : 0;\n\nif (unit === 'kw' && labels.length > 40) {\n  sum = sum / 6;\n  hojeNoMes = hojeNoMes / 6;\n}\n\nreturn [{\n  mes_kwh: sum.toFixed(2),\n  mes_hoje_kwh: hojeNoMes.toFixed(2),\n  mes_inclui_hoje: hojeNoMes > 0,\n}];"
+        },
+        "id": "64b6421f-e5f7-4da5-a9da-3c45bdd03243",
+        "name": "Calcular kWh Mes",
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1,
+        "position": [
+          496,
+          16
+        ]
+      },
+      {
+        "parameters": {
+          "url": "https://internation-cloud.solplanet.net/api/chart/production/international/month",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "plantId",
+                "value": "={{$json.plant_id}}"
+              },
+              {
+                "name": "date",
+                "value": "={{$now.toFormat('yyyy-MM')}}"
+              },
+              {
+                "name": "isno"
+              }
+            ]
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Cookie",
+                "value": "=acw_tc={{$node[\"Extrair Tokens\"].json.acw_tc}}; apitoken={{$node[\"Extrair Tokens\"].json.jwt}}"
+              },
+              {
+                "name": "token",
+                "value": "={{$node[\"Extrair Tokens\"].json.token}}"
+              },
+              {
+                "name": "locale",
+                "value": "pt_BR"
+              },
+              {
+                "name": "referer",
+                "value": "https://internation-cloud.solplanet.net/home/plant"
+              },
+              {
+                "name": "Accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "2a549cc6-fdff-4a03-ae9d-4ca40757a221",
+        "name": "Buscar Producao Mes",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          224,
+          288
+        ]
+      },
+      {
+        "parameters": {
+          "functionCode": "const values=($json.result?.data?.ac||[]).map(v=>parseFloat(v)||0);let soma=0;for(const v of values)soma+=v;const energia=soma/6;return[{energia_kwh:energia.toFixed(2)}];"
+        },
+        "id": "f64d8667-a935-4c9b-bf78-c90d01267d14",
+        "name": "Calcular kWh Dia",
+        "type": "n8n-nodes-base.function",
+        "typeVersion": 1,
+        "position": [
+          688,
+          -384
+        ]
+      },
+      {
+        "parameters": {
+          "url": "https://internation-cloud.solplanet.net/api/chart/production/international/daily",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "plantId",
+                "value": "={{$json.plant_id}}"
+              },
+              {
+                "name": "date",
+                "value": "={{$now.toFormat('yyyy-MM-dd')}}"
+              },
+              {
+                "name": "isno"
+              }
+            ]
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Cookie",
+                "value": "=acw_tc={{$node[\"Extrair Tokens\"].json.acw_tc}}; apitoken={{$node[\"Extrair Tokens\"].json.jwt}}"
+              },
+              {
+                "name": "token",
+                "value": "={{$node[\"Extrair Tokens\"].json.token}}"
+              },
+              {
+                "name": "locale",
+                "value": "pt_BR"
+              },
+              {
+                "name": "referer",
+                "value": "https://internation-cloud.solplanet.net/home/plant"
+              },
+              {
+                "name": "Accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "f3c1f724-21c1-4868-ade3-0cb56b188fc6",
+        "name": "Buscar Producao Dia",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          480,
+          -384
+        ]
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 20
+              }
+            ]
+          }
+        },
+        "id": "7459ba7b-7237-4f03-9b76-0c36fde7e360",
+        "name": "Schedule 20h",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1,
+        "position": [
+          -1568,
+          -112
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "messages-api",
+          "instanceName": "Aivora",
+          "remoteJid": "={{ $('SplitInBatches Usuarios').item.json.telefone }}",
+          "messageText": "=🌞 Relatório Solar\n📅 {{ $now.format('dd-MM-yyyy') }}\n\n⚡ Geração do dia: {{ $('Consolidar Todos Dados').item.json.energia_kwh }} kWh\n📊 Acumulado do mês: {{ $('Consolidar Todos Dados').item.json.mes_kwh }} kWh\n🏭 Planta: {{ $('Consolidar Todos Dados').item.json.plant_name }}\n\n☀️ Energia limpa gerando resultados!",
+          "options_message": {}
+        },
+        "type": "n8n-nodes-evolution-api.evolutionApi",
+        "typeVersion": 1,
+        "position": [
+          2560,
+          -128
+        ],
+        "id": "e4863674-4a51-4215-9d79-e4e93fc4fe46",
+        "name": "Enviar texto",
+        "credentials": {
+          "evolutionApi": {
+            "id": "vzR4It2iSNrEc05g",
+            "name": "EvolutionAivora"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "af6ec9f7-529b-49e1-bb18-0626ce894f38",
+                "leftValue": "={{ $json.body.data.apitoken }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          -560,
+          -112
+        ],
+        "id": "c5b04ee0-d726-441b-9214-51fe265620cc",
+        "name": "If"
+      },
+      {
+        "parameters": {
+          "amount": 2
+        },
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1,
+        "position": [
+          -384,
+          0
+        ],
+        "id": "f9974b10-7e99-47ed-9828-9016f7a5c6a7",
+        "name": "Wait1",
+        "webhookId": "43463973-082e-4c75-8301-a13593171c41"
+      }
+    ],
+    "connections": {
+      "Ajustar Acumulado Mês": {
+        "main": [
+          [
+            {
+              "node": "Merge com Nome Planta",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Wait": {
+        "main": [
+          [
+            {
+              "node": "SplitInBatches Usuarios",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "SplitInBatches Usuarios": {
+        "main": [
+          [
+            {
+              "node": "Login Solplanet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get many rows": {
+        "main": [
+          [
+            {
+              "node": "SplitInBatches Usuarios",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send a message": {
+        "main": [
+          [
+            {
+              "node": "Enviar texto",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Consolidar Todos Dados": {
+        "main": [
+          [
+            {
+              "node": "Send a message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge Email + Anexo": {
+        "main": [
+          [
+            {
+              "node": "Consolidar Todos Dados",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "chartDataUrl": {
+        "main": [
+          [
+            {
+              "node": "Merge Email + Anexo",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Extract from File": {
+        "main": [
+          [
+            {
+              "node": "chartDataUrl",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Nome do Arquivo": {
+        "main": [
+          [
+            {
+              "node": "Extract from File",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "QuickChart": {
+        "main": [
+          [
+            {
+              "node": "Nome do Arquivo",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Montar Chart Config Mes": {
+        "main": [
+          [
+            {
+              "node": "QuickChart",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge com Nome Planta": {
+        "main": [
+          [
+            {
+              "node": "Merge Email + Anexo",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extrair Nome Planta": {
+        "main": [
+          [
+            {
+              "node": "Buscar Producao Mes",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Buscar Producao Dia",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Lista de Plantas": {
+        "main": [
+          [
+            {
+              "node": "Extrair Nome Planta",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extrair Tokens": {
+        "main": [
+          [
+            {
+              "node": "Buscar Lista de Plantas",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Login Solplanet": {
+        "main": [
+          [
+            {
+              "node": "If",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge Dia+Mes": {
+        "main": [
+          [
+            {
+              "node": "Ajustar Acumulado Mês",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Calcular kWh Mes": {
+        "main": [
+          [
+            {
+              "node": "Merge Dia+Mes",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Buscar Producao Mes": {
+        "main": [
+          [
+            {
+              "node": "Montar Chart Config Mes",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Calcular kWh Mes",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Calcular kWh Dia": {
+        "main": [
+          [
+            {
+              "node": "Merge Dia+Mes",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buscar Producao Dia": {
+        "main": [
+          [
+            {
+              "node": "Calcular kWh Dia",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Schedule 20h": {
+        "main": [
+          [
+            {
+              "node": "Get many rows",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Enviar texto": {
+        "main": [
+          [
+            {
+              "node": "Wait",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If": {
+        "main": [
+          [
+            {
+              "node": "Extrair Tokens",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Wait1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Wait1": {
+        "main": [
+          [
+            {
+              "node": "SplitInBatches Usuarios",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Vinicius Martins",
+    "name": null,
+    "description": null
+  },
   "tags": []
 }
