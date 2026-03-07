@@ -1,0 +1,776 @@
+{
+  "updatedAt": "2026-03-06T23:07:17.482Z",
+  "createdAt": "2026-01-05T17:47:22.707Z",
+  "id": "geF1Tm1pQHfgixKx",
+  "name": "Extrator Pro",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "b0c6a501-c1a4-4edc-b011-4091e27297bf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        112,
+        272
+      ],
+      "id": "59b481c1-cbbd-4f5c-a108-92df6deeaf1a",
+      "name": "Webhook",
+      "webhookId": "b0c6a501-c1a4-4edc-b011-4091e27297bf"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Adaptado para funcionar corretamente no n8n\n\n// Pega os dados do body enviado pelo Webhook\nconst empresas = items[0].json.body || [];\n\nreturn empresas.map(emp => {\n  // Remove tudo que não for dígito\n  const apenasDigitos = String(emp.telefone || '').replace(/\\D/g, '');\n\n  // Garante que comece com 55\n  const comPais = apenasDigitos.startsWith('55')\n    ? apenasDigitos\n    : `55${apenasDigitos}`;\n\n  // Gera jid_12 e jid_13 corretamente\n  const ddd = comPais.slice(2, 4);\n  const numeroSemDDD = comPais.slice(4);\n\n  const jid_12 = `${comPais}@s.whatsapp.net`;\n  const jid_13 = `55${ddd}9${numeroSemDDD}@s.whatsapp.net`;\n\n  return {\n    json: {\n      nome_empresa: emp.nome_empresa || '',\n      endereco: emp.endereco || '',\n      website: emp.website || '',\n      rating: emp.rating || '',\n      reviews: emp.reviews || '',\n      especialidades: emp.especialidades || '',\n      telefone_original: emp.telefone || '',\n      jid_12,\n      jid_13\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        272
+      ],
+      "id": "ca41f121-da8a-4090-821c-c8c9a5c09f65",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "content": "## Extrator Evolua Pró",
+        "height": 940,
+        "width": 3760,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b39882c6-9e83-4d4e-b6f7-14328f421ab1",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# ABASTECIMENTO Extrator Pró",
+        "height": 80,
+        "width": 600,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "ca86e7d6-2bba-4417-8115-e601731c6883",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "78f34ae6-559a-44d5-bb2e-90a22caa6d93",
+              "name": "remote_jid_12",
+              "value": "={{ \n  (() => {\n    const tel = String($json.telefone_original).replace(/\\D/g, '');\n    const ddd = tel.slice(0, 2);\n    let numero = tel.slice(2);\n\n    // Remove o 9 só se ele estiver no início do número\n    if (numero.startsWith('9') && numero.length === 9) {\n      numero = numero.slice(1);\n    }\n\n    return `55${ddd}${numero}@s.whatsapp.net`;\n  })() \n}}",
+              "type": "string"
+            },
+            {
+              "id": "9d3dfda4-9461-4da1-9efa-ad5744ac48ff",
+              "name": "remote_jid_13",
+              "value": "={{ \n  (() => {\n    const tel = String($json.telefone_original).replace(/\\D/g, '');\n    const ddd = tel.slice(0, 2);\n    let numero = tel.slice(2);\n\n    // Adiciona o 9 apenas se ainda não começar com 9\n    if (!numero.startsWith('9')) {\n      numero = '9' + numero;\n    }\n\n    return `55${ddd}${numero}@s.whatsapp.net`;\n  })()\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1440,
+        304
+      ],
+      "id": "b78755ae-972e-4e5f-89d5-85f780edcbb5",
+      "name": "SETA_12_13"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('DADOS').item.json.url_do_evolution }}/chat/whatsappNumbers/{{ $('DADOS').item.json.instancia_evolution }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $('DADOS').item.json.api_key_evolution }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"numbers\": [\"{{ $('SETA_12_13').first().json.remote_jid_12.trim() }}\"]\n}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1792,
+        304
+      ],
+      "id": "8b6f25ff-d267-4555-973c-b12415244ebc",
+      "name": "Check JID 12",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        944,
+        272
+      ],
+      "id": "7807ee33-2704-443a-9e93-c8c0b39a8208",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "aa10db6d-a9eb-4fe4-b9ef-d187369e2b5e",
+              "leftValue": "={{ $json.exists }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2080,
+        144
+      ],
+      "id": "83f0d8d2-a267-40a4-a3ed-a47c89d6fce2",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fbe31f74-4905-47a1-bda3-635a665a8ed5",
+              "leftValue": "={{ $json.exists }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2560,
+        528
+      ],
+      "id": "9517bad6-59be-4a91-b705-653251a628ba",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('DADOS').item.json.url_do_evolution }}/chat/whatsappNumbers/{{ $('DADOS').first().json.instancia_evolution }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $('DADOS').item.json.api_key_evolution }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"numbers\": [\"{{ $('SETA_12_13').item.json.remote_jid_13.trim() }}\"]\n}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2288,
+        384
+      ],
+      "id": "41530de5-9a0d-4c9d-ab38-e285983c20ff",
+      "name": "Check JID 13",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1lmEyFKzNi1HAXInm-ICGiWGl-9VqsMzdypY3dWTZSqc",
+          "mode": "list",
+          "cachedResultName": "Leads_Ibiuna",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lmEyFKzNi1HAXInm-ICGiWGl-9VqsMzdypY3dWTZSqc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lmEyFKzNi1HAXInm-ICGiWGl-9VqsMzdypY3dWTZSqc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "nome_empresa": "={{ $('Loop Over Items').item.json.nome_empresa }}",
+            "telefone": "={{ $('If').first().json.jid }}",
+            "endereco": "={{ $('Loop Over Items').item.json.endereco }}",
+            "website": "={{ $('Loop Over Items').item.json.website }}",
+            "rating": "={{ $('Loop Over Items').item.json.rating }}",
+            "reviews": "={{ $('Loop Over Items').item.json.reviews }}",
+            "especialidades": "={{ $('Loop Over Items').item.json.especialidades }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "nome_empresa",
+              "displayName": "nome_empresa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "telefone",
+              "displayName": "telefone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "endereco",
+              "displayName": "endereco",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "website",
+              "displayName": "website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "rating",
+              "displayName": "rating",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "reviews",
+              "displayName": "reviews",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "especialidades",
+              "displayName": "especialidades",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "mensagem",
+              "displayName": "mensagem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "disparo",
+              "displayName": "disparo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        3328,
+        640
+      ],
+      "id": "bb26ebb6-2783-4903-bc49-24dd371ed8e7",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "zArczES6ncW3h74q",
+          "name": "WinnerMidia"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f54ace6d-93b9-4219-b7bc-c01baabc41ad",
+              "name": "url_do_evolution",
+              "value": "https://api.winnermidia.online",
+              "type": "string"
+            },
+            {
+              "id": "ed523a0c-b1d7-4d15-957e-e08b22c64143",
+              "name": "api_key_evolution",
+              "value": "D8509C00F907-4C58-92A4-F0248DD26D0A",
+              "type": "string"
+            },
+            {
+              "id": "8e88f47d-aef0-4c73-bcb9-025aebfc837b",
+              "name": "instancia_evolution",
+              "value": "winner",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        272
+      ],
+      "id": "af674a9a-b5da-4884-a5e6-93e434c564c4",
+      "name": "DADOS"
+    },
+    {
+      "parameters": {
+        "content": "## Alterar AQUI",
+        "height": 320,
+        "width": 260,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        544,
+        160
+      ],
+      "id": "2e896bb6-e75b-4cde-a29c-c7f44e758bd9",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3568,
+        640
+      ],
+      "id": "a6cf8415-dff1-4323-af9a-676a15540ecb",
+      "name": "Wait",
+      "webhookId": "1670e064-8750-49a0-a3ab-4d79a9e324a1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1lmEyFKzNi1HAXInm-ICGiWGl-9VqsMzdypY3dWTZSqc",
+          "mode": "list",
+          "cachedResultName": "Leads_Ibiuna",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lmEyFKzNi1HAXInm-ICGiWGl-9VqsMzdypY3dWTZSqc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lmEyFKzNi1HAXInm-ICGiWGl-9VqsMzdypY3dWTZSqc/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "telefone",
+              "lookupValue": "={{ $json.jid }}"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        2832,
+        128
+      ],
+      "id": "5075432d-006a-4c7a-8a58-2fe874cc2810",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "zArczES6ncW3h74q",
+          "name": "WinnerMidia"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9949dc12-7010-4366-9596-a8412e0f7797",
+              "leftValue": "={{ Object.keys($json).length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2832,
+        400
+      ],
+      "id": "5e5bd604-1662-472c-bb7e-6a93b2c16536",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "content": "## Alterar AQUI",
+        "height": 320,
+        "width": 260,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3248,
+        560
+      ],
+      "id": "d26d6f85-41f4-432c-9f5d-013ad22e8c17",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Alterar AQUI",
+        "height": 320,
+        "width": 260,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2752,
+        32
+      ],
+      "id": "1ea23a15-7b31-4690-9a06-dff1a4b3a9a9",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2832,
+        640
+      ],
+      "id": "4814fe6f-8783-4a96-bc4a-606e21a40711",
+      "name": "No Operation, do nothing"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "DADOS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SETA_12_13": {
+      "main": [
+        [
+          {
+            "node": "Check JID 12",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check JID 12": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "SETA_12_13",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Check JID 13",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check JID 13": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DADOS": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "e6b4e670-b29d-4ffd-86fd-af774d41a23b",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-01-05T17:47:22.707Z",
+      "createdAt": "2026-01-05T17:47:22.707Z",
+      "role": "workflow:owner",
+      "workflowId": "geF1Tm1pQHfgixKx",
+      "projectId": "v0LdrnPHSqH3q9P1"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
