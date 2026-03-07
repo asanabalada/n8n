@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-04T18:55:43.298Z",
+  "updatedAt": "2026-03-06T16:28:35.732Z",
   "createdAt": "2026-03-04T03:45:21.387Z",
   "id": "RdzFfzqD6R7nNBBp",
   "name": "Aviso de Agendamento Próximo para o cliente",
@@ -32,7 +32,7 @@
       "parameters": {
         "resource": "messages-api",
         "instanceName": "Aivora",
-        "remoteJid": "={{ $('Busca Aviso de agendamento próximo').item.json.telefone_cliente }}",
+        "remoteJid": "={{ $('Itera sobre os agendados').item.json.telefone_cliente }}",
         "messageText": "={{ $json.text }}",
         "options_message": {}
       },
@@ -93,8 +93,8 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        784,
-        224
+        752,
+        48
       ],
       "id": "3e2ef1f0-a562-4b76-b577-71f8a3a33c0f",
       "name": "Lista de Agendamento",
@@ -214,11 +214,6 @@
       "main": [
         [
           {
-            "node": "Lista de Agendamento",
-            "type": "main",
-            "index": 0
-          },
-          {
             "node": "Busca Aviso de agendamento próximo",
             "type": "main",
             "index": 0
@@ -251,13 +246,7 @@
     },
     "Lista de Agendamento": {
       "main": [
-        [
-          {
-            "node": "Itera sobre os agendados",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Busca Aviso de agendamento próximo": {
@@ -314,9 +303,30 @@
     }
   },
   "meta": null,
-  "pinData": {},
-  "versionId": "ea88e5f1-eac0-4126-8598-c0acd46203e0",
-  "activeVersionId": "ea88e5f1-eac0-4126-8598-c0acd46203e0",
+  "pinData": {
+    "Roda Aviso": [
+      {
+        "json": {
+          "timestamp": "2026-03-06T08:00:08.016-03:00",
+          "Readable date": "March 6th 2026, 8:00:08 am",
+          "Readable time": "8:00:08 am",
+          "Day of week": "Friday",
+          "Year": "2026",
+          "Month": "March",
+          "Day of month": "06",
+          "Hour": "08",
+          "Minute": "00",
+          "Second": "08",
+          "Timezone": "America/Sao_Paulo (UTC-03:00)"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "versionId": "aa035b40-d019-48bf-9b88-c3bebb72a840",
+  "activeVersionId": "aa035b40-d019-48bf-9b88-c3bebb72a840",
   "triggerCount": 1,
   "shared": [
     {
@@ -328,9 +338,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-03-04T16:20:09.385Z",
-    "createdAt": "2026-03-04T16:20:09.385Z",
-    "versionId": "ea88e5f1-eac0-4126-8598-c0acd46203e0",
+    "updatedAt": "2026-03-06T16:28:35.733Z",
+    "createdAt": "2026-03-06T16:28:35.733Z",
+    "versionId": "aa035b40-d019-48bf-9b88-c3bebb72a840",
     "workflowId": "RdzFfzqD6R7nNBBp",
     "nodes": [
       {
@@ -359,7 +369,7 @@
         "parameters": {
           "resource": "messages-api",
           "instanceName": "Aivora",
-          "remoteJid": "={{ $('Busca Aviso de agendamento próximo').item.json.telefone_cliente }}",
+          "remoteJid": "={{ $('Itera sobre os agendados').item.json.telefone_cliente }}",
           "messageText": "={{ $json.text }}",
           "options_message": {}
         },
@@ -420,8 +430,8 @@
         "type": "n8n-nodes-base.googleSheets",
         "typeVersion": 4.5,
         "position": [
-          784,
-          224
+          752,
+          48
         ],
         "id": "3e2ef1f0-a562-4b76-b577-71f8a3a33c0f",
         "name": "Lista de Agendamento",
@@ -541,11 +551,6 @@
         "main": [
           [
             {
-              "node": "Lista de Agendamento",
-              "type": "main",
-              "index": 0
-            },
-            {
               "node": "Busca Aviso de agendamento próximo",
               "type": "main",
               "index": 0
@@ -578,13 +583,7 @@
       },
       "Lista de Agendamento": {
         "main": [
-          [
-            {
-              "node": "Itera sobre os agendados",
-              "type": "main",
-              "index": 0
-            }
-          ]
+          []
         ]
       },
       "Busca Aviso de agendamento próximo": {
