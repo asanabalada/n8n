@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-02-24T17:52:01.905Z",
+  "updatedAt": "2026-03-06T22:28:10.866Z",
   "createdAt": "2026-02-05T02:25:31.762Z",
   "id": "gFnX1MulXZWyzgKA",
   "name": "Prospecção - Automação",
@@ -265,7 +265,7 @@
             {
               "id": "bc2a1451-2a6d-450e-8adf-b4fc1fd342d7",
               "name": "server_url",
-              "value": "https://api.winnermidia.online/",
+              "value": "https://api.winnermidia.online",
               "type": "string"
             },
             {
@@ -415,10 +415,10 @@
         "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
-          "value": "1yTdD-Lfa6FZlhEu2UPaGG4RMnRD3r88QeajgZHq9HXw",
+          "value": "1lmEyFKzNi1HAXInm-ICGiWGl-9VqsMzdypY3dWTZSqc",
           "mode": "list",
-          "cachedResultName": "Leads_SR",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yTdD-Lfa6FZlhEu2UPaGG4RMnRD3r88QeajgZHq9HXw/edit?usp=drivesdk"
+          "cachedResultName": "Leads_Ibiuna",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lmEyFKzNi1HAXInm-ICGiWGl-9VqsMzdypY3dWTZSqc/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
@@ -860,8 +860,8 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -1040,
-        320
+        -1088,
+        896
       ],
       "id": "763ae961-f077-4c8e-8575-ddf40e59064d",
       "name": "When clicking ‘Test workflow’"
@@ -1152,17 +1152,17 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "1yTdD-Lfa6FZlhEu2UPaGG4RMnRD3r88QeajgZHq9HXw",
+          "value": "1lmEyFKzNi1HAXInm-ICGiWGl-9VqsMzdypY3dWTZSqc",
           "mode": "list",
-          "cachedResultName": "Leads_SR",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yTdD-Lfa6FZlhEu2UPaGG4RMnRD3r88QeajgZHq9HXw/edit?usp=drivesdk"
+          "cachedResultName": "Leads_Ibiuna",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lmEyFKzNi1HAXInm-ICGiWGl-9VqsMzdypY3dWTZSqc/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "Página1",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yTdD-Lfa6FZlhEu2UPaGG4RMnRD3r88QeajgZHq9HXw/edit#gid=0"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lmEyFKzNi1HAXInm-ICGiWGl-9VqsMzdypY3dWTZSqc/edit#gid=0"
         },
         "options": {}
       },
@@ -1469,7 +1469,7 @@
       "main": [
         [
           {
-            "node": "Dados",
+            "node": "Code",
             "type": "main",
             "index": 0
           }
@@ -1511,13 +1511,7 @@
     },
     "Schedule Trigger": {
       "main": [
-        [
-          {
-            "node": "Code",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "If1": {
@@ -1580,7 +1574,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "4c3014f0-d659-4605-b5fa-abe6687f1123",
+  "versionId": "17191c0e-ca89-4ad7-bf02-3f46eddf7ab5",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
