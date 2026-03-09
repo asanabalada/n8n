@@ -1,0 +1,383 @@
+{
+  "updatedAt": "2026-03-08T16:59:48.077Z",
+  "createdAt": "2026-03-08T16:57:54.610Z",
+  "id": "NakHiKPXgdo0GlQG",
+  "name": "Monitoramento Solplanet Brito",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 0 7-18/2 * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1360,
+        -96
+      ],
+      "id": "b96cb8cb-d571-40fa-ab68-4c0a1c086d72",
+      "name": "Schedule Trigger",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "812846ea-26a1-44c7-af5c-9da607af6f65",
+      "name": "SplitInBatches Usuarios",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 2,
+      "position": [
+        -944,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "usuarios",
+        "limit": 1000
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -1152,
+        -96
+      ],
+      "id": "e272f9b4-bb94-49ec-834d-85b418f87a3d",
+      "name": "Get many rows",
+      "credentials": {
+        "supabaseApi": {
+          "id": "UocZjWZfXsK0Ynmx",
+          "name": "SupabaseAgenteSolar"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "const body=$json.body;const headers=$json.headers||{};let acw='';const sc=headers['set-cookie']||[];for(const c of sc){if(c.includes('acw_tc=')){acw=c.split(';')[0].replace('acw_tc=','');break;}}return[{jwt:body.data.apitoken,token:body.data.token,acw_tc:acw}];"
+      },
+      "id": "7dd67cac-f553-4e62-b1f7-55f73edeed43",
+      "name": "Extrair Tokens",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://internation-cloud.solplanet.net/api/user/login",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "account",
+              "value": "={{ $json.login }}"
+            },
+            {
+              "name": "password",
+              "value": "={{ $json.senha }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "43ca61a0-ae97-49e6-aafe-a6cdc1733f9f",
+      "name": "Login Solplanet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        -672,
+        -112
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "https://internation-cloud.solplanet.net/api/plant/plantList",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "own",
+              "value": "1"
+            },
+            {
+              "name": "type",
+              "value": "1"
+            },
+            {
+              "name": "name"
+            },
+            {
+              "name": "state"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Cookie",
+              "value": "=acw_tc={{$json.acw_tc}}; apitoken={{$json.jwt}}"
+            },
+            {
+              "name": "token",
+              "value": "={{$json.token}}"
+            },
+            {
+              "name": "locale",
+              "value": "pt_BR"
+            },
+            {
+              "name": "referer",
+              "value": "https://internation-cloud.solplanet.net/home/plantlist"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2bdbe465-222d-4a60-b813-cfce7188e863",
+      "name": "Buscar Lista de Plantas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        -224,
+        -112
+      ],
+      "retryOnFail": true,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bc8132e1-6ffb-42c0-8eab-5fc874a54edb",
+              "leftValue": "={{ $json.result[0].status }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "86cb2782-93c3-46c5-a91a-5bf93013fa28",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -16,
+        -112
+      ],
+      "id": "7f1a8a57-644c-41d9-bd96-c20e8044d9d8",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "Aivora",
+        "remoteJid": "5511972107522",
+        "messageText": "=🚨 *ALERTA NOC - USINA OFFLINE* 🚨\n\nO sistema detectou uma falha de comunicação com a seguinte usina:\n\n👤 *Cliente:* {{ $('SplitInBatches Usuarios').item.json.login }}\n🏭 *Planta:* {{ $json.result[0].stationname }}\n⚠️ *Status Código:* {{ $json.result[0].status }}\n📞 *Telefone:* {{ $('SplitInBatches Usuarios').item.json.telefone }}\n\n*Ação Recomendada:* Entrar em contato com o cliente para verificar disjuntor desarmado ou rede Wi-Fi.",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        192,
+        -208
+      ],
+      "id": "f0c8eb2d-0a7c-435e-9542-0034b4e70aea",
+      "name": "Enviar texto",
+      "credentials": {
+        "evolutionApi": {
+          "id": "vzR4It2iSNrEc05g",
+          "name": "EvolutionAivora"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        400,
+        32
+      ],
+      "id": "3236380c-4f3b-46f7-9b7a-269bf1d25461",
+      "name": "Wait",
+      "webhookId": "7337cd83-65c3-415b-b618-108c35c7d571"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SplitInBatches Usuarios": {
+      "main": [
+        [
+          {
+            "node": "Login Solplanet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches Usuarios",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair Tokens": {
+      "main": [
+        [
+          {
+            "node": "Buscar Lista de Plantas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Login Solplanet": {
+      "main": [
+        [
+          {
+            "node": "Extrair Tokens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Lista de Plantas": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Enviar texto",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar texto": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches Usuarios",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "5caa37d3-9d36-4c94-abfa-52f510c3e21e",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-03-08T16:57:54.610Z",
+      "createdAt": "2026-03-08T16:57:54.610Z",
+      "role": "workflow:owner",
+      "workflowId": "NakHiKPXgdo0GlQG",
+      "projectId": "v0LdrnPHSqH3q9P1"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
