@@ -1,0 +1,409 @@
+{
+  "updatedAt": "2026-03-10T01:18:41.493Z",
+  "createdAt": "2026-03-09T23:41:34.756Z",
+  "id": "ebgvfYoeFU4feDbL",
+  "name": "Kanban",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Você é um assistente de triagem de leads de um SaaS. Analise a seguinte mensagem de um lead e classifique o nível de interesse dele em relação a uma prospecção.\n\nResponda APENAS com um arquivo JSON contendo duas chaves:\n- \"status\": que deve ser estritamente uma destas opções: \"Interessado\", \"Sem Interesse\" ou \"Dúvida\".\n- \"resumo\": um resumo de no máximo 5 palavras do que ele disse.\n\nMensagem do lead: {{ $json.resposta }}",
+              "role": "system"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "name": "Classifica IA",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.6,
+      "position": [
+        80,
+        0
+      ],
+      "id": "716d1bd3-d0e4-44e7-b154-616f0a70994b",
+      "credentials": {
+        "openAiApi": {
+          "id": "ZGZmDyG3mcaRmuUn",
+          "name": "WinnerMidia"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.telefone }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "É mensagem válida?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -144,
+        16
+      ],
+      "id": "5cbdd567-630e-489c-9f83-308b00b706e7"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extrai o corpo da requisição do Webhook\nconst webhookData = $input.first().json.body;\n\n// Verifica se existe a estrutura de mensagem da Evolution API\nif (webhookData && webhookData.data && webhookData.data.messages) {\n  const msgInfo = webhookData.data.messages[0];\n  \n  // Ignora mensagens enviadas por você mesmo (fromMe: true)\n  if (msgInfo.key.fromMe === false) {\n    \n    // Extrai o telefone (removendo o sufixo @s.whatsapp.net)\n    const telefone = msgInfo.key.remoteJid.split('@')[0];\n    \n    // Tenta encontrar o texto da mensagem em diferentes formatos possíveis\n    let textoResposta = \"\";\n    if (msgInfo.message && msgInfo.message.conversation) {\n      textoResposta = msgInfo.message.conversation;\n    } else if (msgInfo.message && msgInfo.message.extendedTextMessage) {\n      textoResposta = msgInfo.message.extendedTextMessage.text;\n    }\n\n    // Retorna os dados limpos\n    return [{\n      json: {\n        telefone: telefone,\n        resposta: textoResposta,\n        tipo: \"mensagem_recebida\"\n      }\n    }];\n  }\n}\n\n// Se não for uma mensagem válida, retorna vazio para parar o fluxo\nreturn [];"
+      },
+      "name": "Filtra Mensagem",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -352,
+        16
+      ],
+      "id": "704b1fa9-b70b-43d6-9cad-f9e6a8c04fd9"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "evolution-recebe-msg",
+        "options": {}
+      },
+      "name": "Webhook Evolution",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        -576,
+        16
+      ],
+      "id": "17ab8ec6-d4cf-4b79-93d9-41ed8fe9c712",
+      "webhookId": "fe99e88d-0694-40a0-b4c0-694c5642a403"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "leads",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "telefone",
+              "condition": "eq",
+              "keyValue": "={{ $('Filtra Mensagem').item.json.telefone }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status_kanban",
+              "fieldValue": "={{ $json.status }}"
+            },
+            {
+              "fieldId": "resumo_ia",
+              "fieldValue": "={{ $json.resumo }}"
+            }
+          ]
+        }
+      },
+      "id": "0c276f12-ca8d-4e33-88b7-b6a3c7faafcd",
+      "name": "Move Card no Kanban",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        416,
+        0
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "JDYCG0XYGjKs3Ikl",
+          "name": "SupabaseLovableKanban"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Classifica IA": {
+      "main": [
+        [
+          {
+            "node": "Move Card no Kanban",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "É mensagem válida?": {
+      "main": [
+        [
+          {
+            "node": "Classifica IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtra Mensagem": {
+      "main": [
+        [
+          {
+            "node": "É mensagem válida?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Evolution": {
+      "main": [
+        [
+          {
+            "node": "Filtra Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "72f3145e-9b14-4c24-9c67-cc7729763cca",
+  "activeVersionId": "72f3145e-9b14-4c24-9c67-cc7729763cca",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-03-09T23:41:34.756Z",
+      "createdAt": "2026-03-09T23:41:34.756Z",
+      "role": "workflow:owner",
+      "workflowId": "ebgvfYoeFU4feDbL",
+      "projectId": "v0LdrnPHSqH3q9P1"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-03-10T01:18:41.495Z",
+    "createdAt": "2026-03-10T01:18:41.495Z",
+    "versionId": "72f3145e-9b14-4c24-9c67-cc7729763cca",
+    "workflowId": "ebgvfYoeFU4feDbL",
+    "nodes": [
+      {
+        "parameters": {
+          "modelId": {
+            "__rl": true,
+            "value": "gpt-4o-mini",
+            "mode": "list",
+            "cachedResultName": "GPT-4O-MINI"
+          },
+          "messages": {
+            "values": [
+              {
+                "content": "=Você é um assistente de triagem de leads de um SaaS. Analise a seguinte mensagem de um lead e classifique o nível de interesse dele em relação a uma prospecção.\n\nResponda APENAS com um arquivo JSON contendo duas chaves:\n- \"status\": que deve ser estritamente uma destas opções: \"Interessado\", \"Sem Interesse\" ou \"Dúvida\".\n- \"resumo\": um resumo de no máximo 5 palavras do que ele disse.\n\nMensagem do lead: {{ $json.resposta }}",
+                "role": "system"
+              }
+            ]
+          },
+          "jsonOutput": true,
+          "options": {}
+        },
+        "name": "Classifica IA",
+        "type": "@n8n/n8n-nodes-langchain.openAi",
+        "typeVersion": 1.6,
+        "position": [
+          80,
+          0
+        ],
+        "id": "716d1bd3-d0e4-44e7-b154-616f0a70994b",
+        "credentials": {
+          "openAiApi": {
+            "id": "ZGZmDyG3mcaRmuUn",
+            "name": "WinnerMidia"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "c1",
+                "leftValue": "={{ $json.telefone }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "name": "É mensagem válida?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          -144,
+          16
+        ],
+        "id": "5cbdd567-630e-489c-9f83-308b00b706e7"
+      },
+      {
+        "parameters": {
+          "jsCode": "// Extrai o corpo da requisição do Webhook\nconst webhookData = $input.first().json.body;\n\n// Verifica se existe a estrutura de mensagem da Evolution API\nif (webhookData && webhookData.data && webhookData.data.messages) {\n  const msgInfo = webhookData.data.messages[0];\n  \n  // Ignora mensagens enviadas por você mesmo (fromMe: true)\n  if (msgInfo.key.fromMe === false) {\n    \n    // Extrai o telefone (removendo o sufixo @s.whatsapp.net)\n    const telefone = msgInfo.key.remoteJid.split('@')[0];\n    \n    // Tenta encontrar o texto da mensagem em diferentes formatos possíveis\n    let textoResposta = \"\";\n    if (msgInfo.message && msgInfo.message.conversation) {\n      textoResposta = msgInfo.message.conversation;\n    } else if (msgInfo.message && msgInfo.message.extendedTextMessage) {\n      textoResposta = msgInfo.message.extendedTextMessage.text;\n    }\n\n    // Retorna os dados limpos\n    return [{\n      json: {\n        telefone: telefone,\n        resposta: textoResposta,\n        tipo: \"mensagem_recebida\"\n      }\n    }];\n  }\n}\n\n// Se não for uma mensagem válida, retorna vazio para parar o fluxo\nreturn [];"
+        },
+        "name": "Filtra Mensagem",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -352,
+          16
+        ],
+        "id": "704b1fa9-b70b-43d6-9cad-f9e6a8c04fd9"
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "evolution-recebe-msg",
+          "options": {}
+        },
+        "name": "Webhook Evolution",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1.1,
+        "position": [
+          -576,
+          16
+        ],
+        "id": "17ab8ec6-d4cf-4b79-93d9-41ed8fe9c712",
+        "webhookId": "fe99e88d-0694-40a0-b4c0-694c5642a403"
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "tableId": "leads",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "telefone",
+                "condition": "eq",
+                "keyValue": "={{ $('Filtra Mensagem').item.json.telefone }}"
+              }
+            ]
+          },
+          "fieldsUi": {
+            "fieldValues": [
+              {
+                "fieldId": "status_kanban",
+                "fieldValue": "={{ $json.status }}"
+              },
+              {
+                "fieldId": "resumo_ia",
+                "fieldValue": "={{ $json.resumo }}"
+              }
+            ]
+          }
+        },
+        "id": "0c276f12-ca8d-4e33-88b7-b6a3c7faafcd",
+        "name": "Move Card no Kanban",
+        "type": "n8n-nodes-base.supabase",
+        "typeVersion": 1,
+        "position": [
+          416,
+          0
+        ],
+        "credentials": {
+          "supabaseApi": {
+            "id": "JDYCG0XYGjKs3Ikl",
+            "name": "SupabaseLovableKanban"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Classifica IA": {
+        "main": [
+          [
+            {
+              "node": "Move Card no Kanban",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "É mensagem válida?": {
+        "main": [
+          [
+            {
+              "node": "Classifica IA",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Filtra Mensagem": {
+        "main": [
+          [
+            {
+              "node": "É mensagem válida?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook Evolution": {
+        "main": [
+          [
+            {
+              "node": "Filtra Mensagem",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Vinicius Martins",
+    "name": null,
+    "description": null
+  },
+  "tags": []
+}
