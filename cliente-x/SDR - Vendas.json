@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-10T01:18:37.798Z",
+  "updatedAt": "2026-03-11T13:41:30.030Z",
   "createdAt": "2026-01-05T03:32:02.379Z",
   "id": "aU4w8m7aFGpY0sOB",
   "name": "SDR - Vendas",
@@ -758,7 +758,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Pega o conteúdo que veio da OpenAI\nconst content = $input.item.json.message.content;\nlet data;\n\n// 1. Tenta fazer o parse se vier como texto (String)\nif (typeof content === 'string') {\n  try {\n    // Remove possíveis marcadores de markdown\n    const cleanJson = content.replace(/```json|```/g, '');\n    data = JSON.parse(cleanJson);\n  } catch (e) {\n    return { json: { content: [] } };\n  }\n} else {\n  // Se já for objeto, usa direto\n  data = content;\n}\n\n// 2. Normaliza: Procura onde está o Array de mensagens\nlet finalArray = [];\n\nif (Array.isArray(data)) {\n  // Caso 1: Veio o array direto\n  finalArray = data;\n} else if (data.json && Array.isArray(data.json)) {\n  // Caso 2: Veio dentro de 'json' (O SEU CASO ATUAL)\n  finalArray = data.json;\n} else if (data.messages && Array.isArray(data.messages)) {\n  // Caso 3: Veio dentro de 'messages'\n  finalArray = data.messages;\n} else if (data.values && Array.isArray(data.values)) {\n  // Caso 4: Veio dentro de 'values'\n  finalArray = data.values;\n}\n\n// Retorna no formato que o Split Out espera\nreturn {\n  json: {\n    content: finalArray\n  }\n};"
+        "jsCode": "// Pega o conteúdo que veio da OpenAI\nconst content = $input.item.json.message.content;\nlet data;\n\n// 1. Tenta fazer o parse se vier como texto (String)\nif (typeof content === 'string') {\n  try {\n    // Remove possíveis marcadores de markdown\n    const cleanJson = content.replace(/```json|```/g, '');\n    data = JSON.parse(cleanJson);\n  } catch (e) {\n    return { json: { content: [] } };\n  }\n} else {\n  // Se já for objeto, usa direto\n  data = content;\n}\n\n// 2. Normaliza: Procura onde está o Array de mensagens\nlet finalArray = [];\n\nif (Array.isArray(data)) {\n  // Caso 1: Veio o array direto\n  finalArray = data;\n} else if (data.json && Array.isArray(data.json)) {\n  // Caso 2: Veio dentro de 'json' (O SEU CASO ATUAL)\n  finalArray = data.json;\n} else if (data.messages && Array.isArray(data.messages)) {\n  // Caso 3: Veio dentro de 'messages'\n  finalArray = data.messages;\n} else if (data.values && Array.isArray(data.values)) {\n  // Caso 4: Veio dentro de 'values'\n  finalArray = data.values;\n} else if (data.response && Array.isArray(data.response)) {\n  // Caso 5: Veio dentro de 'response' (caso atual)\n  finalArray = data.response;\n}\n\n// Retorna no formato que o Split Out espera\nreturn {\n  json: {\n    content: finalArray\n  }\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -1296,8 +1296,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "c570c61d-59ac-431a-b437-ec7e396c8661",
-  "activeVersionId": "c570c61d-59ac-431a-b437-ec7e396c8661",
+  "versionId": "01f42e4d-1b11-409f-9f42-5eb17701a569",
+  "activeVersionId": "01f42e4d-1b11-409f-9f42-5eb17701a569",
   "triggerCount": 1,
   "shared": [
     {
@@ -1309,9 +1309,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-03-10T01:18:37.800Z",
-    "createdAt": "2026-03-10T01:18:37.800Z",
-    "versionId": "c570c61d-59ac-431a-b437-ec7e396c8661",
+    "updatedAt": "2026-03-11T13:41:30.032Z",
+    "createdAt": "2026-03-11T13:41:30.032Z",
+    "versionId": "01f42e4d-1b11-409f-9f42-5eb17701a569",
     "workflowId": "aU4w8m7aFGpY0sOB",
     "nodes": [
       {
@@ -2066,7 +2066,7 @@
       },
       {
         "parameters": {
-          "jsCode": "// Pega o conteúdo que veio da OpenAI\nconst content = $input.item.json.message.content;\nlet data;\n\n// 1. Tenta fazer o parse se vier como texto (String)\nif (typeof content === 'string') {\n  try {\n    // Remove possíveis marcadores de markdown\n    const cleanJson = content.replace(/```json|```/g, '');\n    data = JSON.parse(cleanJson);\n  } catch (e) {\n    return { json: { content: [] } };\n  }\n} else {\n  // Se já for objeto, usa direto\n  data = content;\n}\n\n// 2. Normaliza: Procura onde está o Array de mensagens\nlet finalArray = [];\n\nif (Array.isArray(data)) {\n  // Caso 1: Veio o array direto\n  finalArray = data;\n} else if (data.json && Array.isArray(data.json)) {\n  // Caso 2: Veio dentro de 'json' (O SEU CASO ATUAL)\n  finalArray = data.json;\n} else if (data.messages && Array.isArray(data.messages)) {\n  // Caso 3: Veio dentro de 'messages'\n  finalArray = data.messages;\n} else if (data.values && Array.isArray(data.values)) {\n  // Caso 4: Veio dentro de 'values'\n  finalArray = data.values;\n}\n\n// Retorna no formato que o Split Out espera\nreturn {\n  json: {\n    content: finalArray\n  }\n};"
+          "jsCode": "// Pega o conteúdo que veio da OpenAI\nconst content = $input.item.json.message.content;\nlet data;\n\n// 1. Tenta fazer o parse se vier como texto (String)\nif (typeof content === 'string') {\n  try {\n    // Remove possíveis marcadores de markdown\n    const cleanJson = content.replace(/```json|```/g, '');\n    data = JSON.parse(cleanJson);\n  } catch (e) {\n    return { json: { content: [] } };\n  }\n} else {\n  // Se já for objeto, usa direto\n  data = content;\n}\n\n// 2. Normaliza: Procura onde está o Array de mensagens\nlet finalArray = [];\n\nif (Array.isArray(data)) {\n  // Caso 1: Veio o array direto\n  finalArray = data;\n} else if (data.json && Array.isArray(data.json)) {\n  // Caso 2: Veio dentro de 'json' (O SEU CASO ATUAL)\n  finalArray = data.json;\n} else if (data.messages && Array.isArray(data.messages)) {\n  // Caso 3: Veio dentro de 'messages'\n  finalArray = data.messages;\n} else if (data.values && Array.isArray(data.values)) {\n  // Caso 4: Veio dentro de 'values'\n  finalArray = data.values;\n} else if (data.response && Array.isArray(data.response)) {\n  // Caso 5: Veio dentro de 'response' (caso atual)\n  finalArray = data.response;\n}\n\n// Retorna no formato que o Split Out espera\nreturn {\n  json: {\n    content: finalArray\n  }\n};"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
