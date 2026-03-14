@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-12T17:54:30.812Z",
+  "updatedAt": "2026-03-13T21:41:10.057Z",
   "createdAt": "2026-01-05T03:32:02.379Z",
   "id": "aU4w8m7aFGpY0sOB",
   "name": "SDR - Vendas",
@@ -960,21 +960,6 @@
       ],
       "id": "6011edcb-5940-450a-af90-687ca022c436",
       "name": "Limit"
-    },
-    {
-      "parameters": {
-        "operation": "send",
-        "additionalFields": {}
-      },
-      "type": "n8n-nodes-base.whatsApp",
-      "typeVersion": 1.1,
-      "position": [
-        1760,
-        -1408
-      ],
-      "id": "104cfe2d-be5f-4b26-a66d-4fd799aefa54",
-      "name": "Send message",
-      "webhookId": "3030360c-7588-4eb2-836a-2a6885126c48"
     }
   ],
   "connections": {
@@ -1315,7 +1300,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "79e5bf30-4a99-4530-899b-689119e908be",
+  "versionId": "44829fde-d263-44cc-89de-1bce0fbf0eed",
   "activeVersionId": null,
   "triggerCount": 1,
   "shared": [
