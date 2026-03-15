@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-13T21:41:10.057Z",
+  "updatedAt": "2026-03-14T15:02:05.664Z",
   "createdAt": "2026-01-05T03:32:02.379Z",
   "id": "aU4w8m7aFGpY0sOB",
   "name": "SDR - Vendas",
@@ -960,6 +960,26 @@
       ],
       "id": "6011edcb-5940-450a-af90-687ca022c436",
       "name": "Limit"
+    },
+    {
+      "parameters": {
+        "resource": "bucket",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.s3",
+      "typeVersion": 1,
+      "position": [
+        -512,
+        -3040
+      ],
+      "id": "9631eee1-0475-4b63-befc-7fb1f6d8de2f",
+      "name": "Create a bucket",
+      "credentials": {
+        "s3": {
+          "id": "lxxYpvsWVPRPXTuj",
+          "name": "WinnerMidiaS3"
+        }
+      }
     }
   ],
   "connections": {
@@ -1300,7 +1320,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "44829fde-d263-44cc-89de-1bce0fbf0eed",
+  "versionId": "5d171898-58e9-487d-b060-1ea492e10f85",
   "activeVersionId": null,
   "triggerCount": 1,
   "shared": [
